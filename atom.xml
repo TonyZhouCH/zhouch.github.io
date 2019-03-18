@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://chzhou.cc/"/>
-  <updated>2019-03-18T13:09:46.421Z</updated>
+  <updated>2018-06-04T15:28:44.331Z</updated>
   <id>http://chzhou.cc/</id>
   
   <author>
@@ -15,29 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>Resume</title>
-    <link href="http://chzhou.cc/2019/03/18/resume/"/>
-    <id>http://chzhou.cc/2019/03/18/resume/</id>
-    <published>2019-03-18T13:27:19.605Z</published>
-    <updated>2019-03-18T13:09:46.421Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="周晨辉"><a href="#周晨辉" class="headerlink" title="周晨辉"></a>周晨辉</h1><h2 id="个人信息"><a href="#个人信息" class="headerlink" title="个人信息"></a>个人信息</h2><ul><li>邮箱：<a href="mailto:543091895@qq.com" target="_blank" rel="noopener">543091895@qq.com</a></li><li>教育经历<ul><li>北京邮电大学/硕士/网络技术研究院/成绩前5%</li><li>中国人民解放军理工大学/本科/成绩专业第二</li></ul></li></ul><h2 id="项目经历"><a href="#项目经历" class="headerlink" title="项目经历"></a>项目经历</h2><ul><li><strong>基于Intel SGX的深度学习模型运行优化 </strong> （2019年1月 - 至今)<ul><li>针对Intel SGX固有的性能缺陷，阅读其driver代码，确定底层工作流程和页表置换算法，进行改进。</li><li>针对深度学习编译器TVM，对深度学习模型进行切分，提高SGX在TVM下对深度学习模型进行Inference的效率。</li></ul></li><li><strong>基于Intel SGX的Spark机器学习安全计算模型</strong>     (2018年8月 - 2018年12月)<ul><li>项目背景是在云端给企业提供安全计算环境，保证企业数据隐私。在项目中学习了Intel SGX安全技术和大数据处理平台Spark。阅读Spark中Machine Learning Library (MLlib)中常见机器学习算法源码。最后将SGX与Spark结合，将常用算法移植到SGX中，进行安全计算。</li><li>相关博客：==TODO==</li></ul></li><li><strong>华录杯手写档案汉字识别比赛</strong>    （2018年8月 - 2018年10月）<ul><li>比赛背景是提取手写简历中汉字结构化信息。本人负责对简历图像的预处理以及神经网络模型输出识别结果的后处理。主要工作使用了OpenCV对图像进行处理，提取结构化信息图像，在结果后处理上，使用与语料库进行匹配纠正的方法，很大程度提高了识别结果。最终取得比赛亚军。</li><li>比赛总结：==TODO==</li></ul></li><li><strong>程序图的智能合约漏洞挖掘</strong>     (2018年5月 - 2018年7月)<ul><li>项目主要针对以太坊智能合约，提出以程序图的方式对智能合约漏洞进行挖掘。在项目中学习了解了区块链的工作原理，并对以太坊智能合约常见漏洞模型进行调研总结，并对典型漏洞进行重现。同时调研学术界针对智能合约漏洞检测的方法模型，并以Oyente工具为例，分析其工作原理，为本项目后续工作提供技术背景支持。</li><li>相关博客：==TODO==</li></ul></li></ul><h2 id="获奖经历"><a href="#获奖经历" class="headerlink" title="获奖经历"></a>获奖经历</h2><ul><li>2018中国华录杯算法赛-亚军     2018年</li><li>北京邮电大学网络与交换技术国家重点实验室优秀研究生     2018年</li><li>北京邮电大学一等奖学金     2018年</li><li>军校优秀学员称号     2015年</li></ul><h2 id="技能"><a href="#技能" class="headerlink" title="技能"></a>技能</h2><ul><li>编程语言：C/C++，Python &gt; Java</li><li>语言：英语（专业英语四级，CET-6, CET-4）</li></ul><p><em>注：由于相关项目文章尚未发表，故部分文章暂不展示</em></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;周晨辉&quot;&gt;&lt;a href=&quot;#周晨辉&quot; class=&quot;headerlink&quot; title=&quot;周晨辉&quot;&gt;&lt;/a&gt;周晨辉&lt;/h1&gt;&lt;h2 id=&quot;个人信息&quot;&gt;&lt;a href=&quot;#个人信息&quot; class=&quot;headerlink&quot; title=&quot;个人信息&quot;&gt;&lt;/a&gt;个人信
-      
-    
-    </summary>
-    
-    
-      <category term="Resume" scheme="http://chzhou.cc/tags/Resume/"/>
-    
-  </entry>
   
   <entry>
     <title>creation code, input data, solc编译出来的code，这三种code有什么区别</title>
