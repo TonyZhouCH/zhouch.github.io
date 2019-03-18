@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="ETH,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="#历史  拜占庭将军问题  如果有N方参与到系统中，那么系统可以容忍N/4的恶意参与者 问题在于，在匿名的情况下，系统设置的安全边界容易遭受女巫攻击，因为一个攻击者可以在一台服务器或者僵尸网络上创建数以千计的节点，从而单方面确保拥有多数份额 解决方法  基于节点的去中心化共识协议与工作量证明机制结合在一起  拥有大量算力的节点有更大的影响力，但获得比整个网络更多的算力比创建一百万个节点困难得多（从">
+<meta name="keywords" content="ETH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ETH白皮书笔记">
+<meta property="og:url" content="http://chzhou.cc/2018/04/24/ETH白皮书笔记/index.html">
+<meta property="og:site_name" content="周的小站">
+<meta property="og:description" content="#历史  拜占庭将军问题  如果有N方参与到系统中，那么系统可以容忍N/4的恶意参与者 问题在于，在匿名的情况下，系统设置的安全边界容易遭受女巫攻击，因为一个攻击者可以在一台服务器或者僵尸网络上创建数以千计的节点，从而单方面确保拥有多数份额 解决方法  基于节点的去中心化共识协议与工作量证明机制结合在一起  拥有大量算力的节点有更大的影响力，但获得比整个网络更多的算力比创建一百万个节点困难得多（从">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://i.loli.net/2018/04/23/5addad5bb5039.png">
+<meta property="og:updated_time" content="2019-03-18T15:14:18.559Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ETH白皮书笔记">
+<meta name="twitter:description" content="#历史  拜占庭将军问题  如果有N方参与到系统中，那么系统可以容忍N/4的恶意参与者 问题在于，在匿名的情况下，系统设置的安全边界容易遭受女巫攻击，因为一个攻击者可以在一台服务器或者僵尸网络上创建数以千计的节点，从而单方面确保拥有多数份额 解决方法  基于节点的去中心化共识协议与工作量证明机制结合在一起  拥有大量算力的节点有更大的影响力，但获得比整个网络更多的算力比创建一百万个节点困难得多（从">
+<meta name="twitter:image" content="https://i.loli.net/2018/04/23/5addad5bb5039.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://chzhou.cc/2018/04/24/ETH白皮书笔记/">
+
+
+
+
+
+  <title>ETH白皮书笔记 | 周的小站</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">周的小站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-resume">
+          <a href="/resume/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            简历
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/04/24/ETH白皮书笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ETH白皮书笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T12:45:53+08:00">
+                2018-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#历史</p>
+<ul>
+<li><p>拜占庭将军问题</p>
+<ul>
+<li>如果有N方参与到系统中，那么系统可以容忍N/4的恶意参与者</li>
+<li><p>问题在于，在匿名的情况下，系统设置的安全边界容易遭受女巫攻击，因为一个攻击者可以在一台服务器或者僵尸网络上创建数以千计的节点，从而单方面确保拥有多数份额</p>
+<p><strong>解决方法</strong></p>
+</li>
+<li><p>基于节点的去中心化共识协议与工作量证明机制结合在一起</p>
+</li>
+<li>拥有大量算力的节点有更大的影响力，但获得比整个网络更多的算力比创建一百万个节点困难得多（从而解决攻击问题）</li>
+</ul>
+</li>
+<li><p>比特币系统的“状态”是所有已经被挖出的、没有花费的比特币（技术上称为<strong>“未花费的交易输出，unspent transaction outputs 或UTXO”</strong>）的集合。每个UTXO都有一个面值和所有者（由20个字节的本质上是密码学公钥的地址所定义[1]）。一笔交易包括一个或多个输入和一个或多个输出。每个输入包含一个对现有UTXO的引用和由与所有者地址相对应的私钥创建的密码学签名。每个输出包含一个新的加入到状态中的UTXO。</p>
+</li>
+<li><p>状态转移函数<code>APPLY(S,TX)-&gt;S’</code>大体上可以如下定义：            </p>
+<ol>
+<li>交易的每个输入：<ul>
+<li>如果引用的UTXO不存在于现在的状态中（S），返回错误提示</li>
+<li>如果签名与UTXO所有者的签名不一致，返回错误提示</li>
+</ul>
+</li>
+<li>如果所有的UTXO输入面值总额小于所有的UTXO输出面值总额，返回错误提示</li>
+<li>返回新状态S’,新状态S’中移除了所有的输入UTXO，增加了所有的输出UTXO</li>
+</ol>
+<p>第一步的第一部分<strong>防止交易的发送者花费不存在的比特币</strong>，第二部分<strong>防止交易的发送者花费其他人的比特币</strong>。第二步确保<strong>价值守恒</strong>。比特币的支付协议如下。假设Alice想给Bob发送11.7BTC。事实上，Alice不可能正好有11.7BTC。假设，她能得到的最小数额比特币的方式是：6+4+2=12。所以，她可以创建一笔有3个输入，2个输出的交易。第一个输出的面值是11.7BTC，所有者是Bob（Bob的比特币地址），第二个输出的面值是0.3BTC，所有者是Alice自己，也就是找零。</p>
+</li>
+<li><p>区块 = 时间戳 + 随机数 + 对上一个区块的引用（即哈希） + 上一区块生成以来发生的所有交易列表。这样随着更新就能够代表账本的最新状态</p>
+</li>
+<li><p>依照这个范式，检查一个区块是否有效的算法如下：</p>
+<ol>
+<li>检查区块引用的上一个区块是否存在且有效</li>
+<li>检查区块的时间戳是否晚于以前的区块的时间戳，而且早于未来2小时</li>
+<li>检查区块的工作量证明是否有效</li>
+<li>将上一个区块的最终状态赋于<code>S[0]</code></li>
+<li>假设TX是区块的交易列表，包含n笔交易。对于属于0……n-1的所有i,进行状态转换<code>S[i+1] = APPLY(S[i],TX[i])</code>。如果任何一笔交易i在状态转换中出错，退出程序，返回错误</li>
+<li>返回正确，状态<code>S[n]</code>是这一区块的最终状态</li>
+</ol>
+</li>
+<li><p>当出现攻击时到底发生了什么：       （防止doublespent）</p>
+<p>因为比特币的密码学基础是非常安全的，所以攻击者会选择攻击没有被密码学直接保护的部分：<strong>交易顺序</strong>。攻击者的策略非常简单：    </p>
+<ol>
+<li>向卖家发送100BTC购买商品（尤其是无需邮寄的电子商品）</li>
+<li>等待直至商品发出</li>
+<li>创建另一笔交易，将相同的100BTC发送给自己的账户。</li>
+<li>使比特币网络相信发送给自己账户的交易是最先发出的</li>
+</ol>
+<p>一旦步骤（1）发生，几分钟后矿工将把这笔交易打包到区块，假设是第270000个区块。大约一个小时以后，在此区块后面将会有五个区块，每个区块间接地指向这笔交易，从而确认这笔交易。这时卖家收到货款，并向买家发货。因为我们假设这是数字商品，攻击者可以即时收到货。现在，攻击者<strong>创建另一笔交易</strong>，将相同的100BTC发送到自己的账户。如果<strong>攻击者只是向全网广播这一消息，这一笔交易不会被处理。矿工会运行状态转换函数APPLY(S,TX)，发现这笔交易将花费已经不在状态中的UTXO</strong>。所以，攻击者会对区块链进行<strong>分叉，将第269999个区块作为父区块重新生成第270000个区块，在此区块中用新的交易取代旧的交易</strong>。因为区块数据是不同的，这要求重新进行工作量证明。另外，因为攻击者生成的新的第270000个区块有不同的哈希，所以原来的第270001到第270005的区块不指向它，因此原有的区块链和攻击者的新区块是完全分离的。在发生区块链分叉时，区块链长的分支被认为是诚实的区块链，合法的的矿工将会沿着原有的第270005区块后挖矿，只有攻击者一人在新的第270000区块后挖矿。<strong>攻击者为了使得他的区块链最长，他需要拥有比除了他以外的全网更多的算力来追赶</strong>（即51%攻击）</p>
+</li>
+<li><p>比特币系统的一个重要的可扩展特性是：它的区块存储在多层次的数据结构中。一个区块的哈希实际上只是区块头的哈希，区块头是包含时间戳、随机数、上个区块哈希和存储了所有的区块交易的默克尔树的根哈希的长度大约为200字节的一段数据。（Merkle Trees）</p>
+</li>
+<li><p><strong>任何对于默克尔树（Merkle Trees）的任何部分进行改变的尝试都会最终导致链上某处的不一致</strong>。默克尔树是一种二叉树，由一组叶节点、一组中间节点和一个根节点构成。最下面的大量的叶节点包含基础数据，每个中间节点是它的两个子节点的哈希，根节点也是由它的两个子节点的哈希，代表了默克尔树的顶部。默克尔树的目的是<strong>允许区块的数据可以零散地传送：节点可以从一个源下载区块头，从另外的源下载与其有关的树的其它部分，而依然能够确认所有的数据都是正确的</strong>。之所以如此是因为哈希向上的扩散：如果一个恶意用户尝试在树的下部加入一个伪造的交易，所引起的改动将导致树的上层节点的改动，以及更上层节点的改动，最终导致根节点的改动以及区块哈希的改动，这样协议就会将其记录为一个完全不同的区块（几乎可以肯定是带着不正确的工作量证明的）</p>
+</li>
+</ul>
+<p>#以太坊</p>
+<ul>
+<li><p>状态是由被称为“账户”（每个账户由一个20字节的地址）的对象和在两个账户之间转移价值和信息的状态转换构成的。以太坊的账户包含四个部分：</p>
+<ol>
+<li>随机数（nonce），用于确保每笔交易只能被处理一次的计数器</li>
+<li>账户目前的以太币余额</li>
+<li>账户的合约代码，如果有的话</li>
+<li>账户的存储（默认为空）</li>
+</ol>
+</li>
+<li><p>以太坊有两种类型的账户：外部所有账户（<strong>externally owned accounts</strong>）（由私钥控制）和合约账户（<strong>contract accounts</strong>）（由合约代码控制）</p>
+</li>
+<li><p>以太坊中的<strong>“交易”</strong>（transaction）是指存储从<strong>外部账户</strong>发出的消息的签名数据包，包含：</p>
+<ol>
+<li>The recipient of the message</li>
+<li>A signature identifying the sender</li>
+<li>The amount of ether to transfer from the sender to the recipient</li>
+<li>An optional data field</li>
+<li>A <code>STARTGAS</code> value, representing the maximum number of computational steps the transaction execution is allowed to take</li>
+<li>A <code>GASPRICE</code> value, representing the fee the sender pays per computational step</li>
+</ol>
+<p>前三部分是加密货币中的标准部分。<code>STARTGAS</code> and <code>GASPRICE</code> fields are crucial for Ethereum’s anti-denial of service model。为了防止代码的指数型爆炸和无限循环以及恶意攻击，每笔交易需要对执行代码所引发的计算步骤—包括初始消息和所有执行中引发的消息—做出限制。计算的基本单位就是<em>“gas”</em>。通常一个计算耗费一个“gas”，但是有的操作可能耗费更多的”gas“，因为这些操作意味着需要更多的计算和资源。这样的话，也能防止恶意攻击者，因为操作所需要的花费是和操作成正比的。</p>
+</li>
+<li><p>合约有能力发送<strong>”消息“</strong>给其他合约。”消息“和”交易“相像，除了”消息“是由合约产生的，而不是外部账户。它包含：</p>
+<ol>
+<li>The sender of the message (implicit)</li>
+<li>The recipient of the message</li>
+<li>The amount of ether to transfer alongside the message</li>
+<li>An optional data field</li>
+<li>A <code>STARTGAS</code> value</li>
+</ol>
+<p>A message is produced when a contract currently executing code executes the<code>CALL</code>opcode, which produces and executes a message. Like a transaction, a message leads to the recipient account running its code。</p>
+</li>
+<li><p>以太坊的状态转换函数：<code>APPLY(S,TX) -&gt; S&#39;</code>，可以定义如下：</p>
+<ol>
+<li><p>检查交易的格式是否正确（即有正确数值）、签名是否有效和随机数(nonce)是否与发送者账户的随机数匹配。如否，返回错误。</p>
+</li>
+<li><p>计算交易费用:<code>fee=STARTGAS * GASPRICE</code>，并从签名中确定发送者的地址。从发送者的账户中减去交易费用和增加发送者的随机数。如果账户余额不足，返回错误。</p>
+</li>
+<li><p>设定初值<code>GAS = STARTGAS</code>，并根据交易中的字节数减去一定量的gas。</p>
+</li>
+<li><p>从发送者的账户转移value到接收者账户。如果接收账户不存在，创建此账户。如果接收账户是一个合约，运行合约的代码，直到代码运行结束或者gas用完。</p>
+</li>
+<li><p>如果因为发送者账户没有足够的钱或者代码执行耗尽gas导致value转移失败，恢复原来的状态，但是还需要支付交易费用，交易费用加至矿工账户。</p>
+</li>
+<li><p>否则，将所有剩余的gas归还给发送者，消耗掉的gas作为交易费用发送给矿工。</p>
+<p><img src="https://i.loli.net/2018/04/23/5addad5bb5039.png" alt="ethertransition.png"></p>
+</li>
+</ol>
+</li>
+<li><p>合约的代码由一系列字节构成，每一个字节代表一种操作。一般而言，代码执行是无限循环，程序计数器每增加一（初始值为零）就执行一次操作，直到代码执行完毕或者遇到错误，或者检测到<code>STOP</code>或者<code>RETURN</code>指令。操作可以访问三种存储数据的空间：</p>
+<ol>
+<li><strong>堆栈</strong>，一种后进先出的数据存储，数值可以入栈，出栈</li>
+<li><strong>内存</strong>，可无限扩展的字节队列（byte array)</li>
+<li><strong>合约的长期存储</strong>，一个秘钥/数值的存储。与计算结束即重置的堆栈和内存不同，存储内容将长期保持</li>
+</ol>
+</li>
+<li><p>EVM运行时，其完整的计算状态可以由元组<strong>（<code>block_state, transaction, message, code, memory, stack, pc, gas</code>）</strong>来定义。</p>
+</li>
+<li><p>以太坊的区块链在很多方面类似于比特币区块链。它们的区块链架构的不同在于，以太坊区块不仅包含交易记录和最近的状态，还包含区块序号和难度值。</p>
+</li>
+<li><p>以太坊的区块确认算法如下：</p>
+<ol>
+<li>检查区块引用的上一个区块是否存在和有效。</li>
+<li>检查区块的时间戳是否比引用的上一个区块大，而且小于15分钟。</li>
+<li>检查区块序号、难度值、 交易根，叔根（uncle root）和gas limit（许多以太坊特有的底层概念）是否有效。</li>
+<li>检查区块的工作量证明是否有效。</li>
+<li>将S[0]赋值为上一个区块的STATE_ROOT。</li>
+<li>将TX赋值为区块的交易列表，一共有n笔交易。对于属于0……n-1的i，进行状态转换<code>S[i+1] = APPLY(S[i],TX[i])</code>。如果任何一个转换发生错误，或者程序执行到此处所花费gas超过了<code>GASLIMIT</code>，返回错误。</li>
+<li>用S[n]给S_FINAL赋值, 向矿工支付区块奖励。</li>
+<li>检查<code>S_FINAL</code>是否与<code>STATE_ROOT</code>相同。如果相同，区块是有效的。否则，区块是无效的。(Check if the Merkle tree root of the state <code>S_FINAL</code> is equal to the final state root provided in the block header. If it is, the block is valid; otherwise, it is not valid.)</li>
+</ol>
+<p>这个方法看似效率低，因为它需要存储每个区块的所有状态，但是事实上以太坊的确认效率可以与比特币相提并论。原因是状态存储在树结构中（tree structure），每增加一个区块只需要改变树结构的一小部分。因此，一般而言，两个相邻的区块的树结构的大部分应该是相同的，因此存储一次数据，可以利用指针（即子树哈希）引用两次。A special kind of tree known as a <strong>“Patricia tree” </strong>is used to accomplish this, including a modification to the Merkle tree concept that allows for nodes to be inserted and deleted, and not just changed, efficiently.</p>
+</li>
+</ul>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><ul>
+<li><p>以太坊之上有三种应用：</p>
+<ul>
+<li>金融应用，比如子货币，金融衍生品，对冲合约，储蓄钱包，遗嘱，甚至一些种类的全面的雇佣合约</li>
+<li>半金融应用，这里有钱的存在但也有很重的非金钱的方面，一个完美的例子是为解决计算问题而设的自我强制悬赏</li>
+<li>在线投票和去中心化治理这样的完全的非金融应用</li>
+</ul>
+</li>
+<li><p>令牌系统（Token Systems）</p>
+<p>关键的一点是理解，所有的货币或者令牌系统，从根本上来说是一个带有如下操作的数据库：<strong>从A中减去X单位并把X单位加到B上，前提条件是(1)A在交易之前有至少X单位以及(2)交易被A批准</strong>。实施一个令牌系统就是把这样一个逻辑实施到一个合约中去。</p>
+<p>理论上，基于以太坊的充当子货币的令牌系统可能包括一个基于比特币的链上元币所缺乏的重要功能：直接用这种货币支付交易费的能力。实现这种能力的方法是在合约里维护一个以太币账户以用来为发送者支付交易费，通过收集被用来充当交易费用的内部货币并把它们在一个不断运行的拍卖中拍卖掉，合约不断为该以太币账户注资。这样用户需要用以太币“激活”他们的账户，但一旦账户中有以太币它将会被重复使用因为每次合约都会为其充值。</p>
+</li>
+<li><p>去中心化存储</p>
+</li>
+<li><p>去中心化自治组织（DAO, decentralized autonomous organization）</p>
+<p>理论上代码是不可更改的，然而通过把代码主干放在一个单独的合约内并且把合约调用的地址指向一个可更改的存储依然可以容易地绕开障碍而使代码变得可修改</p>
+</li>
+<li><p><strong>A decentralized data feed</strong>. For financial contracts for difference, it may actually be possible to decentralize the data feed via a protocol called <strong>SchellingCoin</strong>. SchellingCoin basically works as follows: N parties all put into the system the value of a given datum (eg. the ETH/USD price), the values are sorted, and everyone between the 25th and 75th percentile gets one token as a reward. <strong>Everyone has the incentive to provide the answer that everyone else will provide, and the only value that a large number of players can realistically agree on is the obvious default: the truth</strong>. This creates a decentralized protocol that can theoretically provide any number of values, including the ETH/USD price, the temperature in Berlin or even the result of a particular hard computation.</p>
+</li>
+</ul>
+<h1 id="杂项和关注"><a href="#杂项和关注" class="headerlink" title="杂项和关注"></a>杂项和关注</h1><ul>
+<li>改进的“幽灵”协议（”Greedy Heaviest Observed Subtree” (GHOST) protocol）<ul>
+<li>幽灵协议提出的动机是因为当前快速确认的块链因为区块的高作废率而受到低安全性困扰。因为废区块不会被认为是有效的，而且矿工也会被认为对网络安全做出贡献。而由此也引发出一个中心化问题，拥有的算力矿池份额越大，其挖矿就更有效率，而且也能控制区块链的产生。</li>
+<li>改进的算法就是，<strong>通过在计算哪条链“最长”的时候把废区块也包含进来</strong>。不仅一个区块的父区块和更早的祖先块，祖先块的作废的后代区块（以太坊术语中称之为“叔区块”）也被加进来以计算哪一个区块拥有支持其的最大工作量证明。也给予“叔区块”以及将其纳入计算的“侄子区块”不同奖励，但交易费用不奖励给叔区块。并且废区块只能以叔区块的身份被其父母的第二代至第五代后辈区块，而不是更远关系的后辈区块（例如父母区块的第六代后辈区块，或祖父区块的第三代后辈区块）纳入计算。</li>
+</ul>
+</li>
+<li>交易费用存在一些瑕疵，作为弥补，以太坊简单地建立了一个浮动地上限：没有区块能够包含比BLK_LIMIT_FACTOR 倍长期指数移动平均值更多的操作数。这里，<code>blk.oplimit = floor((blk.parent.oplimit * (EMAFACTOR - 1) + floor(parent.opcount * BLK_LIMIT_FACTOR)) / EMA_FACTOR)</code>，BLK_LIMIT_FACTOR 和 EMA_FACTOR 是暂且被设为 65536 和 1.5 的常数。</li>
+<li>以太坊的挖矿算法减轻了专用挖矿硬件带来的优势，以及减轻了矿池带来的中心化问题。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ETH/" rel="tag"># ETH</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/09/algs4-percolation问题/" rel="next" title="algs4 percolation问题">
+                <i class="fa fa-chevron-left"></i> algs4 percolation问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/11/Oyente issues/" rel="prev" title="Oyente issues">
+                Oyente issues <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
+          <p class="site-author-name" itemprop="name">Zhou</p>
+           
+              <p class="site-description motion-element" itemprop="description">周的小站</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/archive/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">1.</span> <span class="nav-text">应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#杂项和关注"><span class="nav-number">2.</span> <span class="nav-text">杂项和关注</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

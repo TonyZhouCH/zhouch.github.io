@@ -269,6 +269,318 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/06/04/creation-code-input-data-solc编译出来的code，这三种code有什么区别/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/04/creation-code-input-data-solc编译出来的code，这三种code有什么区别/" itemprop="url">creation code, input data, solc编译出来的code，这三种code有什么区别</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-04T23:27:11+08:00">
+                2018-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="三种code"><a href="#三种code" class="headerlink" title="三种code"></a>三种code</h2><ul>
+<li><p>creation code</p>
+<ul>
+<li>在后添加了Constructor Arguments </li>
+</ul>
+</li>
+<li><p>input data</p>
+<ul>
+<li><p>在用命令创建contract的时候需要输入的data</p>
+</li>
+<li><p>格式为bin</p>
+</li>
+<li><p><a href="https://medium.com/@gus_tavo_guim/deploying-a-smart-contract-the-hard-way-8aae778d4f2a" target="_blank" rel="noopener">根据这个blog</a>和<a href="https://github.com/ethereum/go-ethereum/wiki/Contract-Tutorial" target="_blank" rel="noopener">Geth文档</a>，Solc编译出来的bin code作为参数传入创建合约的命令中。</p>
+<ul>
+<li><p>Medium blog</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> deployTransationObject = &#123; <span class="attr">from</span>: eth.accounts[<span class="number">0</span>], <span class="attr">data</span>: storageBinCode, <span class="attr">gas</span>: <span class="number">1000000</span> &#125;;</span><br><span class="line"><span class="keyword">var</span> storageInstance = storageContract.new(deployTransationObject)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Geth 文档</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> greeter = greeterContract.new(_greeting,&#123;<span class="attr">from</span>:web3.eth.accounts[<span class="number">0</span>], <span class="attr">data</span>: greeterCompiled.greeter.code, <span class="attr">gas</span>: <span class="number">1000000</span>&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">e, contract</span>)</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>solc</p>
+<ul>
+<li>solc的关于编译的有两个arguments，其中一个是 <code>--bin</code>，解释为Binary of the contracts in hex，另外一个是<code>--bin-runtime</code>，解释为Binary of the runtime part of the contracts in hex。</li>
+<li>根据这个<a href="https://ethereum.stackexchange.com/questions/13086/solc-bin-vs-bin-runtime" target="_blank" rel="noopener">回答</a>，<code>--bin-runtime</code> is the code that is actually placed on the blockchain. The regular <code>--bin</code> output is the code placed on the blockchain <strong>plus</strong> the code needed to get this code placed on the blockchain</li>
+<li>上面的Medium blog是调用了<code>--bin</code> 命令，而Geth官方文档用的是web3.eth.compile.solidity命令，推测也应该用的是<code>--bin</code>。（未证实）</li>
+</ul>
+</li>
+</ul>
+<h2 id="后续进展"><a href="#后续进展" class="headerlink" title="后续进展"></a>后续进展</h2><ul>
+<li><p>creation code 与 input data</p>
+<p>在Etherscan上寻找几个verified的合约进行验证，得出<strong>creation code</strong>和<strong>input data</strong>是完全一致的。代码由<strong>三部分</strong>组成，第一部分是前面的一些数字，代表着初始化合约的init过程。第二部分是合约的主体过程。第三部分是合约的Constructor Arguments，被添加到了最后。</p>
+</li>
+<li><p>solc</p>
+<p>在stack exchange上进行了<a href="https://ethereum.stackexchange.com/questions/50180/whats-the-contract-creation-code-in-etherscan-verfied-contract" target="_blank" rel="noopener">提问</a>，问题是creation code和solc编译出来的code有何区别。回答是Contract Creation Code is the full bytecode from what contract was deployed, <strong>including constructor parameters</strong>。如果合约没有constructor parameters的话，那么这两种code都是一致的。</p>
+</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><p><a href="https://etherscancom.freshdesk.com/support/solutions/articles/35000022165-contract-verification-constructor-arguments" target="_blank" rel="noopener">https://etherscancom.freshdesk.com/support/solutions/articles/35000022165-contract-verification-constructor-arguments</a></p>
+</li>
+<li><p><a href="https://ethereum.stackexchange.com/questions/13086/solc-bin-vs-bin-runtime" target="_blank" rel="noopener">https://ethereum.stackexchange.com/questions/13086/solc-bin-vs-bin-runtime</a></p>
+</li>
+<li><p><a href="https://medium.com/@gus_tavo_guim/deploying-a-smart-contract-the-hard-way-8aae778d4f2a" target="_blank" rel="noopener">https://medium.com/@gus_tavo_guim/deploying-a-smart-contract-the-hard-way-8aae778d4f2a</a></p>
+</li>
+<li><p><a href="https://github.com/ethereum/go-ethereum/wiki/Contract-Tutorial" target="_blank" rel="noopener">https://github.com/ethereum/go-ethereum/wiki/Contract-Tutorial</a></p>
+</li>
+<li><p><a href="https://ethereum.stackexchange.com/questions/50180/whats-the-contract-creation-code-in-etherscan-verfied-contract" target="_blank" rel="noopener">https://ethereum.stackexchange.com/questions/50180/whats-the-contract-creation-code-in-etherscan-verfied-contract</a></p>
+</li>
+<li><p>验证creation code和input data是否一致的几个合约</p>
+<ul>
+<li><a href="https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code" target="_blank" rel="noopener">https://etherscan.io/address/0xcac337492149bdb66b088bf5914bedfbf78ccc18#code</a></li>
+<li><a href="https://etherscan.io/address/0x7c333b69021b3ad9288d3b0083f9bd27c6d4680a#code" target="_blank" rel="noopener">https://etherscan.io/address/0x7c333b69021b3ad9288d3b0083f9bd27c6d4680a#code</a></li>
+<li><a href="https://etherscan.io/address/0x233d2daad4018fae14c69b2830bf97057c7fb1b5#code" target="_blank" rel="noopener">https://etherscan.io/address/0x233d2daad4018fae14c69b2830bf97057c7fb1b5#code</a></li>
+</ul>
+<p>注：这三个合约的最后都有Constructor Arguments ，不知这个有没有影响导致两种code一致。但是现在比较新的合约在verify的时候都需要提供Constructor Arguments，所以就不加考虑这个因素以及旧的没有Constructor Arguments的合约。</p>
+<p>注：在最新的verified contract里面，检查了最新的前三个合约的两种code，是完全一致的。</p>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/31/DeepLab-v3-predition-out-of-bound/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/31/DeepLab-v3-predition-out-of-bound/" itemprop="url">DeepLab v3+: prediction out of bound</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-31T23:57:48+08:00">
+                2018-05-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="出现情景"><a href="#出现情景" class="headerlink" title="出现情景"></a>出现情景</h2><p>最近在用DeepLab v3+ 训练模型，已经训练好了自己的数据集。可是在验证的时候，程序总是报错。抛出<code>prediction out of bound</code> 的错误。意思很好理解，就是预测超出了范围。但是范围是什么呢？又是如何超出的呢？经过搜索，找出了答案。</p>
+<h2 id="文件代码"><a href="#文件代码" class="headerlink" title="文件代码"></a>文件代码</h2><p>在/deeplab/datasets文件夹下，有一个名为 <em>segmentation_dataset.py</em> 的文件。在该文件夹里，就定义了训练集和验证集的信息。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">_PASCAL_VOC_SEG_INFORMATION = DatasetDescriptor(</span><br><span class="line">    splits_to_sizes=&#123;</span><br><span class="line">        <span class="string">'train'</span>: <span class="number">7</span>,</span><br><span class="line">        <span class="string">'trainval'</span>: <span class="number">0</span>,</span><br><span class="line">        <span class="string">'val'</span>: <span class="number">3</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    num_classes=<span class="number">8</span>,</span><br><span class="line">    ignore_label=<span class="number">255</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这里已经针对自己的数据集进行了修改。其中<code>train</code> 和 <code>val</code>的字段意思就是对应数据集的大小。因为我只是测试，所以这里我的训练集就只有7张，验证集是3张。下面的<code>num_classes</code>和<code>ignore_lable</code>是数据集的类别数目和忽视的类别。而我出问题的就在这个<code>num_classes</code>上。</p>
+<h2 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h2><p>直觉认为这里<code>num_classes</code>就是类别的数目，当然这个想法也是对的。但是这里的前提是<strong>数据集的lable标记是从1开始的</strong>，也就是说，你的类别从1，2，3，…，num_classes这样定义的。但是这个是很反人类的，因为有的时候为了更加直观理解，并不一定从1开始。比如这次百度提供的数据集，车的标记就是33。而我的写的<code>num_classes</code> 是8，自然33要大于8，就抛出了<code>prediction out of bound</code>的错误了。</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>在查到这个问题后，将自己的<code>num_classes</code>变成了这次数据集对应的lableID，但是这次百度给的数据集的id是乘以1000的，所以车的id33，就变成了33000。我这样改之后，训练的时候又爆出了<code>OOM</code> 的问题，也就是说训练爆内存了，显然是因为<code>num_classes</code>的数目太大。</p>
+<p>这样就涉及到了修改对应的id问题，也就是说把车的id经过修改变成1。<a href="https://gist.github.com/DrSleep/4bce37254c5900545e6b65f6a0858b9c" target="_blank" rel="noopener">具体的方案在这里</a>。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a href="https://github.com/tensorflow/models/issues/3906中@BillBai的回答" target="_blank" rel="noopener">https://github.com/tensorflow/models/issues/3906中@BillBai的回答</a></li>
+<li><a href="https://gist.github.com/DrSleep/4bce37254c5900545e6b65f6a0858b9c" target="_blank" rel="noopener">https://gist.github.com/DrSleep/4bce37254c5900545e6b65f6a0858b9c</a></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/29/获取合约在链上运行的实际Code/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -377,6 +689,904 @@
 <p><a href="https://github.com/ethereum/wiki/wiki/JSON-RPC" target="_blank" rel="noopener">https://github.com/ethereum/wiki/wiki/JSON-RPC</a></p>
 </li>
 </ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/26/ETH other known bugs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/26/ETH other known bugs/" itemprop="url">Vulnerable Contracts Resource</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-26T21:47:43+08:00">
+                2018-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><p><strong>51% attack</strong>  （blockchain)</p>
+<ul>
+<li>历史上曾经发生超过过10次51%攻击，仅在上周（2018年5月26日）就发生了3次攻击</li>
+<li>日本加密货币 Monacoin 被一名矿工获得了 57% 的网络算力</li>
+<li>BTG被黑客控制了51%的网络总算力，通过控制区块回滚进行了“双花攻击”</li>
+</ul>
+<p>解决方法：</p>
+<ul>
+<li>保持算力分散 </li>
+<li>避免与其他区块链的PoW算法冲突</li>
+<li>预警机制</li>
+<li>与矿池，交易所建立有效的沟通渠道</li>
+</ul>
+</li>
+<li><p>短地址攻击  (EVM) </p>
+<p>ERC20代币标准中，有一个标准化的transfer函数</p>
+<p><code>function transfer(address _to, uint256 _value) returns (bool success)</code>, 当我们真正调用transfer的时候，在EVM里实际上是在解析一堆ABI字符。在解析到的字符串里，金额在目标地址的后面，并且是紧贴着的。</p>
+<p>假如我们有这么一个地址，</p>
+<p>0x12345678901234567890123456789012345678<strong>00</strong></p>
+<p>如果进行交易的时候，故意把地址末尾两个0去掉，那么EVM就会从<code>_value</code>的高位取0来进行补充。这样的话<code>_value</code>就少位数了，EVM在之后就会给金额后面补零来处理<code>_value</code> ，意味着该数值左移，增加了16*16=256倍。</p>
+<p>解决方法：</p>
+<ul>
+<li>交易所在提币的时候，需要严格校验用户输入的地址，这样可以尽早在前端就禁止掉恶意的短地址</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/25/ETH safe lib/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/25/ETH safe lib/" itemprop="url">ETH safe lib</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-25T22:57:08+08:00">
+                2018-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><p>BANKEX/solidity-float-point-calculation</p>
+<p><a href="https://github.com/BANKEX/solidity-float-point-calculation" target="_blank" rel="noopener">GItHub地址</a>（24 star）</p>
+<p>BANKEX Foundation is building an ecosystem that will help ensure transparency, stability and support, needed to implement blockchain technologies for the purpose of <strong>commercial integration</strong></p>
+<p><a href="https://blog.bankex.org/bankex-foundation-floating-point-library-for-solidity-a6dd87636693" target="_blank" rel="noopener">Medium文章链接在这里</a></p>
+<ul>
+<li>该模块通过npm安装，核心文件 FloatMath.sol 在合约中import即可</li>
+<li>解决的痛点：现在的solidity处理的数都是integer，fixed point numbers，并没有float point numbers，这将为以后合约往金融等需要高精度计算的行业的引用增加了困难。这个库就要解决这个问题。</li>
+</ul>
+</li>
+<li><p>ds-math</p>
+<p><a href="https://github.com/dapphub/ds-math" target="_blank" rel="noopener">GItHub地址</a>（35 star）</p>
+<ul>
+<li>import导入即可</li>
+<li>同样是提供类似于SafeMath的库，对计算进行保证。并新提供了名为 wad (18 decimals) 和 ray (27 decimals) 的数据表示方法</li>
+</ul>
+</li>
+<li><p><strong>awesome-solidity</strong></p>
+<p><a href="https://github.com/bkrem/awesome-solidity#tutorials" target="_blank" rel="noopener">GitHub地址</a>  (763 star)</p>
+<ul>
+<li>汇集了很多 solidity 相关的资源，从官方资源，教程到第三方工具等等</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/19/Oyente_Note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/19/Oyente_Note/" itemprop="url">Oyente Note</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-19T23:44:23+08:00">
+                2018-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#基本文件</p>
+<ul>
+<li>oyente.py：程序的主入口，负责对依赖的检查以及对源文件的获取，通过input_helper进行处理传入symExec.py进行处理</li>
+<li>analysis.py ：==To do==  创建了检查 reentrancy bug, 计算gas值，检查false positive, 检查资金流是否等函数（调用了z3）(但前两个函数并未在其他文件中被调用)</li>
+<li>ast_helper.py：==To do== 将状态转换为ast树（抽象语法树）</li>
+<li>ast_walker.py：==To do== 遍历ast</li>
+<li>basicblock.py：定义一个叫basicblock的类，其中定义一些函数，将在symExec中模拟opcode进行调用</li>
+<li>batch_run.py：批量分析运行合约</li>
+<li>ethereum_data.py：创建自己的数据源，从etherscan获得最新的代码和余额信息</li>
+<li>ethereum_data1.py：创建自己的数据源，从某个服务器上获得最新的代码和余额信息</li>
+<li>global_params.py：定义一些全局参数值</li>
+<li>input_helper.py：对输入进行处理，比如从输入生成disasm文件等</li>
+<li>opcodes.py：对opcode及对应消耗的gas值进行定义</li>
+<li>run_tests.py：读取test_evm/test_data中的json文件进行测试</li>
+<li>source_map.py：==To do==  （获得源代码，获得函数，变量名字，转换等功能，主要从ast, input_helper获得帮助，提供给symExec，vulnerability）</li>
+<li>symExec.py：程序的主要分析模块，涉及到的主要有创建cfg，对opcode进行模拟，检测漏洞等</li>
+<li>utils.py：对在symExec涉及到的函数进行定义，比如对在if判断中两条路径都涉及到的变量进行重命名以进行区分等</li>
+<li>vargenerator.py：在分析中生成所需要的符号变量</li>
+<li>vulnerability.py：定义了各种vulnerability类，以及去除false positive的函数</li>
+<li>state.json：提供分析的初始状态</li>
+</ul>
+<h1 id="分析流程"><a href="#分析流程" class="headerlink" title="分析流程"></a>分析流程</h1><ol>
+<li><p>oyente.py</p>
+<ul>
+<li>从命令行中获取参数，对输入文件的格式，超时时间等全局的状态进行定义</li>
+<li>可以对solidity program, evm bytecode, remote contracts三种格式的文件进行分析</li>
+<li>对文件用<code>evm disasm</code>命令将其分解为opcodes，继而传入<strong>symExec.py</strong>中</li>
+</ul>
+</li>
+<li><p>symExec.py</p>
+<ol>
+<li><ul>
+<li><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_cfg_and_analyze</span><span class="params">()</span>:</span></span><br><span class="line">    tokens = tokenize.generate_tokens(disasm_file.readline)</span><br><span class="line">    collect_vertices(tokens)</span><br><span class="line">    construct_bb()</span><br><span class="line">    construct_static_edges()</span><br><span class="line">    full_sym_exec()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>collect_vertices()</code>和 <code>construct_bb()</code>识别程序中的基本区块，将其存储为顶点。基本区块的识别是通过<code>JUMPDEST</code>, <code>STOP</code>, <code>RETURN</code>, <code>SUICIDE</code>, <code>JUMP</code> and <code>JUMPI</code> 作为分隔符进行的。每个基本区块都是basicblock.py的实例</p>
+</li>
+<li><p>将基本区块建好后，用<code>full_sym_exec</code>进行处理。对每个区块其中的opcode用<code>sym_exec_ins</code>进行处理</p>
+</li>
+<li><p><code>sym_exec_ins</code>对所有的opcode按照yellow_paper中的描述进行尽可能地模拟</p>
+</li>
+</ul>
+</li>
+<li><p>对 time dependency, callstack, reentrancy等漏洞创建检测函数返回结果</p>
+</li>
+<li><p>analysis.py, basicblock.py, global_params.py, input_helper.py, opcodes.py, source_map.py, utils.py, vargenerator.py, vulnerability.py, state.json这些文件在执行过程中提供所需要的类，函数，状态等</p>
+</li>
+<li><p>一些检测漏洞的标准（在项目的code.md中获取）</p>
+<ul>
+<li><p>Callstack attack</p>
+<p>执行sysExec.py中的<strong>check_callstack_attack</strong>函数，如果<code>CALL</code>或者<code>CALLCODE</code>指令发现没有<code>SWAP4, POP, POP, POP, POP, ISZERO</code>(或 SWAP3 followed by 3 POP, etc.) 在其后，则判断为有该漏洞（<code>if(owner.send(amount))</code> 生成的opcode序列即为如此，这是防止该类攻击的推荐写</p>
+</li>
+<li><p>Timestamp dependence attack</p>
+<p>如果<code>path_condition</code>中的变量包含跟时间戳有关的符号变量，即为有该漏洞</p>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h1 id="一些注意事项和问题"><a href="#一些注意事项和问题" class="headerlink" title="一些注意事项和问题"></a>一些注意事项和问题</h1><p>##程序方面</p>
+<ol>
+<li><p>oyente.py</p>
+<ul>
+<li>z3的版本为4.5.1</li>
+<li>evm的版本为1.7.3</li>
+<li>solc的版本为0.4.19</li>
+<li>oyente的版本为0.2.7</li>
+</ul>
+</li>
+<li>symExec.py<ul>
+<li><code>SUICIDE</code> 已经被 <code>SELFDESTRUCT</code> 取代</li>
+</ul>
+</li>
+<li>opcodes.py<ul>
+<li>在gas模块<ul>
+<li><code>Gextcode</code> 消耗的gas值已从20转为700</li>
+<li><code>Gsload</code>从50变为200</li>
+<li><code>Gsuiside</code>已经为<code>Gselfdesturct`</code></li>
+<li><code>Gcall</code>从40到700</li>
+<li><code>Gex byte</code>从10变为50</li>
+</ul>
+</li>
+<li>opcode集合有一些缺失</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/11/Oyente issues/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/11/Oyente issues/" itemprop="url">Oyente issues</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-11T16:50:16+08:00">
+                2018-05-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Oyente-issues"><a href="#Oyente-issues" class="headerlink" title="Oyente issues"></a>Oyente issues</h1><ul>
+<li>Flag <code>CALLCODE</code> is now  deprecated. <code>CALL</code> and <code>DELEGATECALL</code> are needed.</li>
+<li>对于 <code>MULTIPLICATION</code>造成的<code>overflow</code>还没有支持。只能检查出由<code>ADD</code>造成的溢出。（经过对BEC代码的检查，发现该issue仍未解决）</li>
+</ul>
+<p><img src="https://cdn-images-1.medium.com/max/2000/0*MZnv5M0iCeQ7eCGp.png" alt="BEC的overflow"></p>
+<ul>
+<li>可能会检测出 false positive 的 <code>Re-Entrancy</code> 的漏洞</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/04/24/ETH白皮书笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/24/ETH白皮书笔记/" itemprop="url">ETH白皮书笔记</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T12:45:53+08:00">
+                2018-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#历史</p>
+<ul>
+<li><p>拜占庭将军问题</p>
+<ul>
+<li>如果有N方参与到系统中，那么系统可以容忍N/4的恶意参与者</li>
+<li><p>问题在于，在匿名的情况下，系统设置的安全边界容易遭受女巫攻击，因为一个攻击者可以在一台服务器或者僵尸网络上创建数以千计的节点，从而单方面确保拥有多数份额</p>
+<p><strong>解决方法</strong></p>
+</li>
+<li><p>基于节点的去中心化共识协议与工作量证明机制结合在一起</p>
+</li>
+<li>拥有大量算力的节点有更大的影响力，但获得比整个网络更多的算力比创建一百万个节点困难得多（从而解决攻击问题）</li>
+</ul>
+</li>
+<li><p>比特币系统的“状态”是所有已经被挖出的、没有花费的比特币（技术上称为<strong>“未花费的交易输出，unspent transaction outputs 或UTXO”</strong>）的集合。每个UTXO都有一个面值和所有者（由20个字节的本质上是密码学公钥的地址所定义[1]）。一笔交易包括一个或多个输入和一个或多个输出。每个输入包含一个对现有UTXO的引用和由与所有者地址相对应的私钥创建的密码学签名。每个输出包含一个新的加入到状态中的UTXO。</p>
+</li>
+<li><p>状态转移函数<code>APPLY(S,TX)-&gt;S’</code>大体上可以如下定义：            </p>
+<ol>
+<li>交易的每个输入：<ul>
+<li>如果引用的UTXO不存在于现在的状态中（S），返回错误提示</li>
+<li>如果签名与UTXO所有者的签名不一致，返回错误提示</li>
+</ul>
+</li>
+<li>如果所有的UTXO输入面值总额小于所有的UTXO输出面值总额，返回错误提示</li>
+<li>返回新状态S’,新状态S’中移除了所有的输入UTXO，增加了所有的输出UTXO</li>
+</ol>
+<p>第一步的第一部分<strong>防止交易的发送者花费不存在的比特币</strong>，第二部分<strong>防止交易的发送者花费其他人的比特币</strong>。第二步确保<strong>价值守恒</strong>。比特币的支付协议如下。假设Alice想给Bob发送11.7BTC。事实上，Alice不可能正好有11.7BTC。假设，她能得到的最小数额比特币的方式是：6+4+2=12。所以，她可以创建一笔有3个输入，2个输出的交易。第一个输出的面值是11.7BTC，所有者是Bob（Bob的比特币地址），第二个输出的面值是0.3BTC，所有者是Alice自己，也就是找零。</p>
+</li>
+<li><p>区块 = 时间戳 + 随机数 + 对上一个区块的引用（即哈希） + 上一区块生成以来发生的所有交易列表。这样随着更新就能够代表账本的最新状态</p>
+</li>
+<li><p>依照这个范式，检查一个区块是否有效的算法如下：</p>
+<ol>
+<li>检查区块引用的上一个区块是否存在且有效</li>
+<li>检查区块的时间戳是否晚于以前的区块的时间戳，而且早于未来2小时</li>
+<li>检查区块的工作量证明是否有效</li>
+<li>将上一个区块的最终状态赋于<code>S[0]</code></li>
+<li>假设TX是区块的交易列表，包含n笔交易。对于属于0……n-1的所有i,进行状态转换<code>S[i+1] = APPLY(S[i],TX[i])</code>。如果任何一笔交易i在状态转换中出错，退出程序，返回错误</li>
+<li>返回正确，状态<code>S[n]</code>是这一区块的最终状态</li>
+</ol>
+</li>
+<li><p>当出现攻击时到底发生了什么：       （防止doublespent）</p>
+<p>因为比特币的密码学基础是非常安全的，所以攻击者会选择攻击没有被密码学直接保护的部分：<strong>交易顺序</strong>。攻击者的策略非常简单：    </p>
+<ol>
+<li>向卖家发送100BTC购买商品（尤其是无需邮寄的电子商品）</li>
+<li>等待直至商品发出</li>
+<li>创建另一笔交易，将相同的100BTC发送给自己的账户。</li>
+<li>使比特币网络相信发送给自己账户的交易是最先发出的</li>
+</ol>
+<p>一旦步骤（1）发生，几分钟后矿工将把这笔交易打包到区块，假设是第270000个区块。大约一个小时以后，在此区块后面将会有五个区块，每个区块间接地指向这笔交易，从而确认这笔交易。这时卖家收到货款，并向买家发货。因为我们假设这是数字商品，攻击者可以即时收到货。现在，攻击者<strong>创建另一笔交易</strong>，将相同的100BTC发送到自己的账户。如果<strong>攻击者只是向全网广播这一消息，这一笔交易不会被处理。矿工会运行状态转换函数APPLY(S,TX)，发现这笔交易将花费已经不在状态中的UTXO</strong>。所以，攻击者会对区块链进行<strong>分叉，将第269999个区块作为父区块重新生成第270000个区块，在此区块中用新的交易取代旧的交易</strong>。因为区块数据是不同的，这要求重新进行工作量证明。另外，因为攻击者生成的新的第270000个区块有不同的哈希，所以原来的第270001到第270005的区块不指向它，因此原有的区块链和攻击者的新区块是完全分离的。在发生区块链分叉时，区块链长的分支被认为是诚实的区块链，合法的的矿工将会沿着原有的第270005区块后挖矿，只有攻击者一人在新的第270000区块后挖矿。<strong>攻击者为了使得他的区块链最长，他需要拥有比除了他以外的全网更多的算力来追赶</strong>（即51%攻击）</p>
+</li>
+<li><p>比特币系统的一个重要的可扩展特性是：它的区块存储在多层次的数据结构中。一个区块的哈希实际上只是区块头的哈希，区块头是包含时间戳、随机数、上个区块哈希和存储了所有的区块交易的默克尔树的根哈希的长度大约为200字节的一段数据。（Merkle Trees）</p>
+</li>
+<li><p><strong>任何对于默克尔树（Merkle Trees）的任何部分进行改变的尝试都会最终导致链上某处的不一致</strong>。默克尔树是一种二叉树，由一组叶节点、一组中间节点和一个根节点构成。最下面的大量的叶节点包含基础数据，每个中间节点是它的两个子节点的哈希，根节点也是由它的两个子节点的哈希，代表了默克尔树的顶部。默克尔树的目的是<strong>允许区块的数据可以零散地传送：节点可以从一个源下载区块头，从另外的源下载与其有关的树的其它部分，而依然能够确认所有的数据都是正确的</strong>。之所以如此是因为哈希向上的扩散：如果一个恶意用户尝试在树的下部加入一个伪造的交易，所引起的改动将导致树的上层节点的改动，以及更上层节点的改动，最终导致根节点的改动以及区块哈希的改动，这样协议就会将其记录为一个完全不同的区块（几乎可以肯定是带着不正确的工作量证明的）</p>
+</li>
+</ul>
+<p>#以太坊</p>
+<ul>
+<li><p>状态是由被称为“账户”（每个账户由一个20字节的地址）的对象和在两个账户之间转移价值和信息的状态转换构成的。以太坊的账户包含四个部分：</p>
+<ol>
+<li>随机数（nonce），用于确保每笔交易只能被处理一次的计数器</li>
+<li>账户目前的以太币余额</li>
+<li>账户的合约代码，如果有的话</li>
+<li>账户的存储（默认为空）</li>
+</ol>
+</li>
+<li><p>以太坊有两种类型的账户：外部所有账户（<strong>externally owned accounts</strong>）（由私钥控制）和合约账户（<strong>contract accounts</strong>）（由合约代码控制）</p>
+</li>
+<li><p>以太坊中的<strong>“交易”</strong>（transaction）是指存储从<strong>外部账户</strong>发出的消息的签名数据包，包含：</p>
+<ol>
+<li>The recipient of the message</li>
+<li>A signature identifying the sender</li>
+<li>The amount of ether to transfer from the sender to the recipient</li>
+<li>An optional data field</li>
+<li>A <code>STARTGAS</code> value, representing the maximum number of computational steps the transaction execution is allowed to take</li>
+<li>A <code>GASPRICE</code> value, representing the fee the sender pays per computational step</li>
+</ol>
+<p>前三部分是加密货币中的标准部分。<code>STARTGAS</code> and <code>GASPRICE</code> fields are crucial for Ethereum’s anti-denial of service model。为了防止代码的指数型爆炸和无限循环以及恶意攻击，每笔交易需要对执行代码所引发的计算步骤—包括初始消息和所有执行中引发的消息—做出限制。计算的基本单位就是<em>“gas”</em>。通常一个计算耗费一个“gas”，但是有的操作可能耗费更多的”gas“，因为这些操作意味着需要更多的计算和资源。这样的话，也能防止恶意攻击者，因为操作所需要的花费是和操作成正比的。</p>
+</li>
+<li><p>合约有能力发送<strong>”消息“</strong>给其他合约。”消息“和”交易“相像，除了”消息“是由合约产生的，而不是外部账户。它包含：</p>
+<ol>
+<li>The sender of the message (implicit)</li>
+<li>The recipient of the message</li>
+<li>The amount of ether to transfer alongside the message</li>
+<li>An optional data field</li>
+<li>A <code>STARTGAS</code> value</li>
+</ol>
+<p>A message is produced when a contract currently executing code executes the<code>CALL</code>opcode, which produces and executes a message. Like a transaction, a message leads to the recipient account running its code。</p>
+</li>
+<li><p>以太坊的状态转换函数：<code>APPLY(S,TX) -&gt; S&#39;</code>，可以定义如下：</p>
+<ol>
+<li><p>检查交易的格式是否正确（即有正确数值）、签名是否有效和随机数(nonce)是否与发送者账户的随机数匹配。如否，返回错误。</p>
+</li>
+<li><p>计算交易费用:<code>fee=STARTGAS * GASPRICE</code>，并从签名中确定发送者的地址。从发送者的账户中减去交易费用和增加发送者的随机数。如果账户余额不足，返回错误。</p>
+</li>
+<li><p>设定初值<code>GAS = STARTGAS</code>，并根据交易中的字节数减去一定量的gas。</p>
+</li>
+<li><p>从发送者的账户转移value到接收者账户。如果接收账户不存在，创建此账户。如果接收账户是一个合约，运行合约的代码，直到代码运行结束或者gas用完。</p>
+</li>
+<li><p>如果因为发送者账户没有足够的钱或者代码执行耗尽gas导致value转移失败，恢复原来的状态，但是还需要支付交易费用，交易费用加至矿工账户。</p>
+</li>
+<li><p>否则，将所有剩余的gas归还给发送者，消耗掉的gas作为交易费用发送给矿工。</p>
+<p><img src="https://i.loli.net/2018/04/23/5addad5bb5039.png" alt="ethertransition.png"></p>
+</li>
+</ol>
+</li>
+<li><p>合约的代码由一系列字节构成，每一个字节代表一种操作。一般而言，代码执行是无限循环，程序计数器每增加一（初始值为零）就执行一次操作，直到代码执行完毕或者遇到错误，或者检测到<code>STOP</code>或者<code>RETURN</code>指令。操作可以访问三种存储数据的空间：</p>
+<ol>
+<li><strong>堆栈</strong>，一种后进先出的数据存储，数值可以入栈，出栈</li>
+<li><strong>内存</strong>，可无限扩展的字节队列（byte array)</li>
+<li><strong>合约的长期存储</strong>，一个秘钥/数值的存储。与计算结束即重置的堆栈和内存不同，存储内容将长期保持</li>
+</ol>
+</li>
+<li><p>EVM运行时，其完整的计算状态可以由元组<strong>（<code>block_state, transaction, message, code, memory, stack, pc, gas</code>）</strong>来定义。</p>
+</li>
+<li><p>以太坊的区块链在很多方面类似于比特币区块链。它们的区块链架构的不同在于，以太坊区块不仅包含交易记录和最近的状态，还包含区块序号和难度值。</p>
+</li>
+<li><p>以太坊的区块确认算法如下：</p>
+<ol>
+<li>检查区块引用的上一个区块是否存在和有效。</li>
+<li>检查区块的时间戳是否比引用的上一个区块大，而且小于15分钟。</li>
+<li>检查区块序号、难度值、 交易根，叔根（uncle root）和gas limit（许多以太坊特有的底层概念）是否有效。</li>
+<li>检查区块的工作量证明是否有效。</li>
+<li>将S[0]赋值为上一个区块的STATE_ROOT。</li>
+<li>将TX赋值为区块的交易列表，一共有n笔交易。对于属于0……n-1的i，进行状态转换<code>S[i+1] = APPLY(S[i],TX[i])</code>。如果任何一个转换发生错误，或者程序执行到此处所花费gas超过了<code>GASLIMIT</code>，返回错误。</li>
+<li>用S[n]给S_FINAL赋值, 向矿工支付区块奖励。</li>
+<li>检查<code>S_FINAL</code>是否与<code>STATE_ROOT</code>相同。如果相同，区块是有效的。否则，区块是无效的。(Check if the Merkle tree root of the state <code>S_FINAL</code> is equal to the final state root provided in the block header. If it is, the block is valid; otherwise, it is not valid.)</li>
+</ol>
+<p>这个方法看似效率低，因为它需要存储每个区块的所有状态，但是事实上以太坊的确认效率可以与比特币相提并论。原因是状态存储在树结构中（tree structure），每增加一个区块只需要改变树结构的一小部分。因此，一般而言，两个相邻的区块的树结构的大部分应该是相同的，因此存储一次数据，可以利用指针（即子树哈希）引用两次。A special kind of tree known as a <strong>“Patricia tree” </strong>is used to accomplish this, including a modification to the Merkle tree concept that allows for nodes to be inserted and deleted, and not just changed, efficiently.</p>
+</li>
+</ul>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><ul>
+<li><p>以太坊之上有三种应用：</p>
+<ul>
+<li>金融应用，比如子货币，金融衍生品，对冲合约，储蓄钱包，遗嘱，甚至一些种类的全面的雇佣合约</li>
+<li>半金融应用，这里有钱的存在但也有很重的非金钱的方面，一个完美的例子是为解决计算问题而设的自我强制悬赏</li>
+<li>在线投票和去中心化治理这样的完全的非金融应用</li>
+</ul>
+</li>
+<li><p>令牌系统（Token Systems）</p>
+<p>关键的一点是理解，所有的货币或者令牌系统，从根本上来说是一个带有如下操作的数据库：<strong>从A中减去X单位并把X单位加到B上，前提条件是(1)A在交易之前有至少X单位以及(2)交易被A批准</strong>。实施一个令牌系统就是把这样一个逻辑实施到一个合约中去。</p>
+<p>理论上，基于以太坊的充当子货币的令牌系统可能包括一个基于比特币的链上元币所缺乏的重要功能：直接用这种货币支付交易费的能力。实现这种能力的方法是在合约里维护一个以太币账户以用来为发送者支付交易费，通过收集被用来充当交易费用的内部货币并把它们在一个不断运行的拍卖中拍卖掉，合约不断为该以太币账户注资。这样用户需要用以太币“激活”他们的账户，但一旦账户中有以太币它将会被重复使用因为每次合约都会为其充值。</p>
+</li>
+<li><p>去中心化存储</p>
+</li>
+<li><p>去中心化自治组织（DAO, decentralized autonomous organization）</p>
+<p>理论上代码是不可更改的，然而通过把代码主干放在一个单独的合约内并且把合约调用的地址指向一个可更改的存储依然可以容易地绕开障碍而使代码变得可修改</p>
+</li>
+<li><p><strong>A decentralized data feed</strong>. For financial contracts for difference, it may actually be possible to decentralize the data feed via a protocol called <strong>SchellingCoin</strong>. SchellingCoin basically works as follows: N parties all put into the system the value of a given datum (eg. the ETH/USD price), the values are sorted, and everyone between the 25th and 75th percentile gets one token as a reward. <strong>Everyone has the incentive to provide the answer that everyone else will provide, and the only value that a large number of players can realistically agree on is the obvious default: the truth</strong>. This creates a decentralized protocol that can theoretically provide any number of values, including the ETH/USD price, the temperature in Berlin or even the result of a particular hard computation.</p>
+</li>
+</ul>
+<h1 id="杂项和关注"><a href="#杂项和关注" class="headerlink" title="杂项和关注"></a>杂项和关注</h1><ul>
+<li>改进的“幽灵”协议（”Greedy Heaviest Observed Subtree” (GHOST) protocol）<ul>
+<li>幽灵协议提出的动机是因为当前快速确认的块链因为区块的高作废率而受到低安全性困扰。因为废区块不会被认为是有效的，而且矿工也会被认为对网络安全做出贡献。而由此也引发出一个中心化问题，拥有的算力矿池份额越大，其挖矿就更有效率，而且也能控制区块链的产生。</li>
+<li>改进的算法就是，<strong>通过在计算哪条链“最长”的时候把废区块也包含进来</strong>。不仅一个区块的父区块和更早的祖先块，祖先块的作废的后代区块（以太坊术语中称之为“叔区块”）也被加进来以计算哪一个区块拥有支持其的最大工作量证明。也给予“叔区块”以及将其纳入计算的“侄子区块”不同奖励，但交易费用不奖励给叔区块。并且废区块只能以叔区块的身份被其父母的第二代至第五代后辈区块，而不是更远关系的后辈区块（例如父母区块的第六代后辈区块，或祖父区块的第三代后辈区块）纳入计算。</li>
+</ul>
+</li>
+<li>交易费用存在一些瑕疵，作为弥补，以太坊简单地建立了一个浮动地上限：没有区块能够包含比BLK_LIMIT_FACTOR 倍长期指数移动平均值更多的操作数。这里，<code>blk.oplimit = floor((blk.parent.oplimit * (EMAFACTOR - 1) + floor(parent.opcount * BLK_LIMIT_FACTOR)) / EMA_FACTOR)</code>，BLK_LIMIT_FACTOR 和 EMA_FACTOR 是暂且被设为 65536 和 1.5 的常数。</li>
+<li>以太坊的挖矿算法减轻了专用挖矿硬件带来的优势，以及减轻了矿池带来的中心化问题。</li>
+</ul>
 
           
         
@@ -682,355 +1892,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2017/04/24/离散数学：1-2-Applications-of-Propositional-Logic/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zhou">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/24/离散数学：1-2-Applications-of-Propositional-Logic/" itemprop="url">离散数学: 1.2 Applications of Propositional Logic</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-24T18:52:01+08:00">
-                2017-04-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>从名字可以看出，这一节是对上一节知识的应用。在这一节中，介绍了在搜索引擎中如何利用<code>AND</code>、<code>OR</code>等进行精确查找所需内容，还有一些逻辑谜题、电路实现逻辑运算的内容。整节比较简单易懂。</p>
-<p>[TOC]</p>
-<hr>
-<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><h3 id="2-Translating-English-Sentence"><a href="#2-Translating-English-Sentence" class="headerlink" title="2. Translating English Sentence"></a>2. Translating English Sentence</h3><p>把自然语言翻译为逻辑语言的练习。自然语言具有不精确、磨棱两可、省略许多背景信息的特点，而逻辑语言则要求准确无误，所以在翻译过程中一定要认真，理清关系。</p>
-<h3 id="3-System-Specifications"><a href="#3-System-Specifications" class="headerlink" title="3. System Specifications"></a>3. System Specifications</h3><p>这个小节是说当几个命题组成一个”system”的时候，必须保持“一致性”，不能互相矛盾。</p>
-<h3 id="4-Boolean-Searches"><a href="#4-Boolean-Searches" class="headerlink" title="4. Boolean Searches"></a>4. Boolean Searches</h3><ul>
-<li><code>AND</code>去搜索两个目标都存在的网页。</li>
-<li><code>OR</code>去搜索只要有两者之一或者两者都有的网页。</li>
-<li><code>NOT</code>去搜索两者剔除其中一者的网页。</li>
-</ul>
-<h3 id="5-Logic-Puzzles"><a href="#5-Logic-Puzzles" class="headerlink" title="5. Logic Puzzles"></a>5. Logic Puzzles</h3><p>介绍了几个运用逻辑的小问题，类似于脑筋急转弯。</p>
-<h3 id="6-Logic-Circuits"><a href="#6-Logic-Circuits" class="headerlink" title="6. Logic Circuits"></a>6. Logic Circuits</h3><p>简单介绍了逻辑运算的电路实现形式，分别有“非门”、“或门”、“与门”三种。</p>
-<p><img src="https://ooo.0o0.ooo/2017/04/24/58fdf29745421.png" alt="捕获.PNG"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2017/04/24/离散数学：1-1-Propositional-Logic/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zhou">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/24/离散数学：1-1-Propositional-Logic/" itemprop="url">离散数学: 1.1 Propositional Logic</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-24T18:51:07+08:00">
-                2017-04-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>这一节是对命题逻辑的入门。其中对我印象最大的是对“异或”的解释，让我不再像以前对“异或”混沌了。</p>
-<p>我就根据书上的目录去进行知识的梳理。</p>
-<p>[TOC]</p>
-<hr>
-<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><h3 id="2-Propositions"><a href="#2-Propositions" class="headerlink" title="2. Propositions"></a>2. Propositions</h3><ul>
-<li>命题的两个要素<ul>
-<li>declarative</li>
-<li>either true or false</li>
-</ul>
-</li>
-<li>“真值”标记为<code>T</code>，“假值”标记为<code>F</code></li>
-<li>Truth Table</li>
-<li>几种基本运算符号<ul>
-<li>p    ﹁p</li>
-<li>p∧q，意为”p and q” </li>
-<li>p∨q，意为”p or q”，这个是”inclusive or”</li>
-<li>p⊕q，意为”p xor q”，这个是”exclusive or”。这里的<code>exclusive</code>即为”排除“之意。书中的解释很好，是”Students who have taken calculus <strong>or</strong> computer science, but <strong>not both</strong>, can enroll in this class.”也就是说只能二取一，但不能都取。这样也就解释了为什么在进行二进制异或计算时，只有<code>0</code>和<code>1</code>在一起才能计算出<code>1</code>，<code>0</code>和<code>0</code> 或者<code>1</code> 和<code>1</code>只能得到<code>0</code></li>
-</ul>
-</li>
-</ul>
-<h3 id="3-Conditional-Statements"><a href="#3-Conditional-Statements" class="headerlink" title="3. Conditional Statements"></a>3. Conditional Statements</h3><ul>
-<li><p>p→q</p>
-<ul>
-<li><p>if p, then q</p>
-</li>
-<li><p>p is hypothesis, q is conclusion</p>
-</li>
-<li><p>statement is False when p is true and q is false, and True otherwise</p>
-<p>（陈述的真值表书中的解释很完美，是这样解释的：选举人在竞选时说：“if我当选了，then我就会降低税率”。倘若这个选举人真的竞选成功了，那么人们就会期待他降低税率。但是他没有降低税率，这样我们此时就能说这个陈述是假的。其他情况我们都只能说时真的，无论这个选举人有无竞选上。）</p>
-</li>
-<li><p>等价的表述还有<code>p only if q</code>和<code>q unless ﹁p</code>（从真值表去证明）</p>
-</li>
-</ul>
-</li>
-<li><p>三个变化</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">converse</th>
-<th style="text-align:center">q→p</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">inverse</td>
-<td style="text-align:center">﹁p→﹁q</td>
-</tr>
-<tr>
-<td style="text-align:center">contrapositive</td>
-<td style="text-align:center">﹁q→﹁p</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>p↔q</li>
-</ul>
-<h3 id="4-Truth-Table-of-Compound-Propositions"><a href="#4-Truth-Table-of-Compound-Propositions" class="headerlink" title="4. Truth Table of Compound Propositions"></a>4. Truth Table of Compound Propositions</h3><h3 id="5-Precedence-of-Logical-Operators"><a href="#5-Precedence-of-Logical-Operators" class="headerlink" title="5. Precedence of Logical Operators"></a>5. Precedence of Logical Operators</h3><p>各种运算符号的优先级。</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">运算符</th>
-<th style="text-align:center">优先级</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">﹁</td>
-<td style="text-align:center">1</td>
-</tr>
-<tr>
-<td style="text-align:center">∧</td>
-<td style="text-align:center">2</td>
-</tr>
-<tr>
-<td style="text-align:center">∨</td>
-<td style="text-align:center">3</td>
-</tr>
-<tr>
-<td style="text-align:center">→</td>
-<td style="text-align:center">4</td>
-</tr>
-<tr>
-<td style="text-align:center">↔</td>
-<td style="text-align:center">5</td>
-</tr>
-</tbody>
-</table>
-<h3 id="6-Logic-and-Bit-Operations"><a href="#6-Logic-and-Bit-Operations" class="headerlink" title="6. Logic and Bit Operations"></a>6. Logic and Bit Operations</h3><ul>
-<li>二进制表示时，<code>1</code>表示<code>T</code>，<code>0</code>表示<code>F</code></li>
-<li><code>AND</code>为<code>∧</code>, <code>OR</code>为<code>∨</code>,<code>XOR</code>为<code>⊕</code></li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1074,7 +1940,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

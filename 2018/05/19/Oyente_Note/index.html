@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="ETH,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="#基本文件  oyente.py：程序的主入口，负责对依赖的检查以及对源文件的获取，通过input_helper进行处理传入symExec.py进行处理 analysis.py ：==To do==  创建了检查 reentrancy bug, 计算gas值，检查false positive, 检查资金流是否等函数（调用了z3）(但前两个函数并未在其他文件中被调用) ast_helper.py：=">
+<meta name="keywords" content="ETH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oyente Note">
+<meta property="og:url" content="http://chzhou.cc/2018/05/19/Oyente_Note/index.html">
+<meta property="og:site_name" content="周的小站">
+<meta property="og:description" content="#基本文件  oyente.py：程序的主入口，负责对依赖的检查以及对源文件的获取，通过input_helper进行处理传入symExec.py进行处理 analysis.py ：==To do==  创建了检查 reentrancy bug, 计算gas值，检查false positive, 检查资金流是否等函数（调用了z3）(但前两个函数并未在其他文件中被调用) ast_helper.py：=">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-18T15:06:12.995Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Oyente Note">
+<meta name="twitter:description" content="#基本文件  oyente.py：程序的主入口，负责对依赖的检查以及对源文件的获取，通过input_helper进行处理传入symExec.py进行处理 analysis.py ：==To do==  创建了检查 reentrancy bug, 计算gas值，检查false positive, 检查资金流是否等函数（调用了z3）(但前两个函数并未在其他文件中被调用) ast_helper.py：=">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://chzhou.cc/2018/05/19/Oyente_Note/">
+
+
+
+
+
+  <title>Oyente Note | 周的小站</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">周的小站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-resume">
+          <a href="/resume/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            简历
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/05/19/Oyente_Note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Oyente Note</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-19T23:44:23+08:00">
+                2018-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#基本文件</p>
+<ul>
+<li>oyente.py：程序的主入口，负责对依赖的检查以及对源文件的获取，通过input_helper进行处理传入symExec.py进行处理</li>
+<li>analysis.py ：==To do==  创建了检查 reentrancy bug, 计算gas值，检查false positive, 检查资金流是否等函数（调用了z3）(但前两个函数并未在其他文件中被调用)</li>
+<li>ast_helper.py：==To do== 将状态转换为ast树（抽象语法树）</li>
+<li>ast_walker.py：==To do== 遍历ast</li>
+<li>basicblock.py：定义一个叫basicblock的类，其中定义一些函数，将在symExec中模拟opcode进行调用</li>
+<li>batch_run.py：批量分析运行合约</li>
+<li>ethereum_data.py：创建自己的数据源，从etherscan获得最新的代码和余额信息</li>
+<li>ethereum_data1.py：创建自己的数据源，从某个服务器上获得最新的代码和余额信息</li>
+<li>global_params.py：定义一些全局参数值</li>
+<li>input_helper.py：对输入进行处理，比如从输入生成disasm文件等</li>
+<li>opcodes.py：对opcode及对应消耗的gas值进行定义</li>
+<li>run_tests.py：读取test_evm/test_data中的json文件进行测试</li>
+<li>source_map.py：==To do==  （获得源代码，获得函数，变量名字，转换等功能，主要从ast, input_helper获得帮助，提供给symExec，vulnerability）</li>
+<li>symExec.py：程序的主要分析模块，涉及到的主要有创建cfg，对opcode进行模拟，检测漏洞等</li>
+<li>utils.py：对在symExec涉及到的函数进行定义，比如对在if判断中两条路径都涉及到的变量进行重命名以进行区分等</li>
+<li>vargenerator.py：在分析中生成所需要的符号变量</li>
+<li>vulnerability.py：定义了各种vulnerability类，以及去除false positive的函数</li>
+<li>state.json：提供分析的初始状态</li>
+</ul>
+<h1 id="分析流程"><a href="#分析流程" class="headerlink" title="分析流程"></a>分析流程</h1><ol>
+<li><p>oyente.py</p>
+<ul>
+<li>从命令行中获取参数，对输入文件的格式，超时时间等全局的状态进行定义</li>
+<li>可以对solidity program, evm bytecode, remote contracts三种格式的文件进行分析</li>
+<li>对文件用<code>evm disasm</code>命令将其分解为opcodes，继而传入<strong>symExec.py</strong>中</li>
+</ul>
+</li>
+<li><p>symExec.py</p>
+<ol>
+<li><ul>
+<li><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build_cfg_and_analyze</span><span class="params">()</span>:</span></span><br><span class="line">    tokens = tokenize.generate_tokens(disasm_file.readline)</span><br><span class="line">    collect_vertices(tokens)</span><br><span class="line">    construct_bb()</span><br><span class="line">    construct_static_edges()</span><br><span class="line">    full_sym_exec()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>collect_vertices()</code>和 <code>construct_bb()</code>识别程序中的基本区块，将其存储为顶点。基本区块的识别是通过<code>JUMPDEST</code>, <code>STOP</code>, <code>RETURN</code>, <code>SUICIDE</code>, <code>JUMP</code> and <code>JUMPI</code> 作为分隔符进行的。每个基本区块都是basicblock.py的实例</p>
+</li>
+<li><p>将基本区块建好后，用<code>full_sym_exec</code>进行处理。对每个区块其中的opcode用<code>sym_exec_ins</code>进行处理</p>
+</li>
+<li><p><code>sym_exec_ins</code>对所有的opcode按照yellow_paper中的描述进行尽可能地模拟</p>
+</li>
+</ul>
+</li>
+<li><p>对 time dependency, callstack, reentrancy等漏洞创建检测函数返回结果</p>
+</li>
+<li><p>analysis.py, basicblock.py, global_params.py, input_helper.py, opcodes.py, source_map.py, utils.py, vargenerator.py, vulnerability.py, state.json这些文件在执行过程中提供所需要的类，函数，状态等</p>
+</li>
+<li><p>一些检测漏洞的标准（在项目的code.md中获取）</p>
+<ul>
+<li><p>Callstack attack</p>
+<p>执行sysExec.py中的<strong>check_callstack_attack</strong>函数，如果<code>CALL</code>或者<code>CALLCODE</code>指令发现没有<code>SWAP4, POP, POP, POP, POP, ISZERO</code>(或 SWAP3 followed by 3 POP, etc.) 在其后，则判断为有该漏洞（<code>if(owner.send(amount))</code> 生成的opcode序列即为如此，这是防止该类攻击的推荐写</p>
+</li>
+<li><p>Timestamp dependence attack</p>
+<p>如果<code>path_condition</code>中的变量包含跟时间戳有关的符号变量，即为有该漏洞</p>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h1 id="一些注意事项和问题"><a href="#一些注意事项和问题" class="headerlink" title="一些注意事项和问题"></a>一些注意事项和问题</h1><p>##程序方面</p>
+<ol>
+<li><p>oyente.py</p>
+<ul>
+<li>z3的版本为4.5.1</li>
+<li>evm的版本为1.7.3</li>
+<li>solc的版本为0.4.19</li>
+<li>oyente的版本为0.2.7</li>
+</ul>
+</li>
+<li>symExec.py<ul>
+<li><code>SUICIDE</code> 已经被 <code>SELFDESTRUCT</code> 取代</li>
+</ul>
+</li>
+<li>opcodes.py<ul>
+<li>在gas模块<ul>
+<li><code>Gextcode</code> 消耗的gas值已从20转为700</li>
+<li><code>Gsload</code>从50变为200</li>
+<li><code>Gsuiside</code>已经为<code>Gselfdesturct`</code></li>
+<li><code>Gcall</code>从40到700</li>
+<li><code>Gex byte</code>从10变为50</li>
+</ul>
+</li>
+<li>opcode集合有一些缺失</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ETH/" rel="tag"># ETH</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/11/Oyente issues/" rel="next" title="Oyente issues">
+                <i class="fa fa-chevron-left"></i> Oyente issues
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/25/ETH safe lib/" rel="prev" title="ETH safe lib">
+                ETH safe lib <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
+          <p class="site-author-name" itemprop="name">Zhou</p>
+           
+              <p class="site-description motion-element" itemprop="description">周的小站</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/archive/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#分析流程"><span class="nav-number">1.</span> <span class="nav-text">分析流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一些注意事项和问题"><span class="nav-number">2.</span> <span class="nav-text">一些注意事项和问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
