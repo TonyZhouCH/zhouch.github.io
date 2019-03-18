@@ -344,7 +344,16 @@
 文档分为两部分，第一部分为TVM自身及SGX属性的编译，第二部分为SGX APP的编译
 
 TVM 编译1234cd /mntmkdir build &amp;&amp; cd buildcmake .. -DUSE_LLVM=ON -DUSE_SGX=/opt/sgxsdk -DRUST_SGX_SDK=/opt/rust-sgx-sdkmake -j4
-根据文档，在启动好Dock
+根据文档，在启动好Docker后，进行编译。这里的编译是先由CMakeLists.txt生成Makefile，再进行编译。
+
+CMakeLists.txt
+在TVM主目录下（即/mnt)下，有总的CMakeLists.txt，其中关键语句为：
+1tvm_option(USE_SGX "Build with SGX" OFF)
+在这里开启TVM编译时的SGX选项。
+
+在 /mnt/cmake/modules/SGX.cmake里，对SGX的部分进行编译
+其中关键语句是在这里，使用SGX SDK里面的sgx_edger8r对tvm.edl进行解析，生成tvm_t.c/h和tvm_u.c/h 
+1234567891011add_custom_command(    OUTPUT $&#123;_tvm_u_h&#125;    COMMAND $&#123;USE_SGX&#125;/bin/x64/sgx_edger8r --untrusted      --untrusted --untrusted-dir $&#123;_sgx_src&#125;/untrusted      --trusted --trusted-dir $&#123;_sgx_src&#125;/trusted      --search-path $&#123;USE_SGX&#125;/include --search-path 
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -472,7 +481,13 @@ TVM 编译1234cd /mntmkdir build &amp;&amp; cd buildcmake .. -DUSE_LLVM=ON -DUSE
           
           项目说明本次的赛题名称为“汉字档案手写识别大赛“，是“中国华录杯·开放数据创新应用大赛”复赛。最后我们队伍的成绩以编辑距离为评判准则，分数为0.18151，排名第二。
 文档分为三个部分，分别为”配准“，”识别“，”匹配“三个内容。
-比赛任务本次任务中，参赛队伍将获得某公司人力部门所提供的近1000份应聘人员登记表格扫描图片，其中包含应聘人员的性别、民族、生日和教育经历等基本信息（姓名联系方式亲属等
+比赛任务本次任务中，参赛队伍将获得某公司人力部门所提供的近1000份应聘人员登记表格扫描图片，其中包含应聘人员的性别、民族、生日和教育经历等基本信息（姓名联系方式亲属等个人身份敏感信息已进行严格脱敏处理），还包括应聘者的个人学术或生活中所获荣誉与工作技能。参赛者需要利用得到的近1000张扫描件进行模型构建，从每个pdf文件中监测到表格，并从表格中提取指定类别的内容，准确地识别更多的类似档案扫描文件。
+本次比赛没有提供训练集，选手需自行寻找手写体数据，以完成模型的训练。测试集数据为脱敏后的《应聘登记表》，共有990张图片，是脱敏后的“应聘登记表”的扫描文件。每一份应聘登记表都包括应聘者性别、民族、生日、教育经历等基本信息，以及工作技能等求职相关信息。所有图片被分为2组，分别是为线上测试集和线下测试集。线上测试集共398张图片，可供参赛者下载，用于计算线上排名和调整模型；线下测试集，共592张（不提供下载），用于线下审核检查。
+本次比赛的评分标准为编辑距离，同时考虑识别结果与正确结果之间的”增删改“。其中编辑距离的公式如下：
+$$ Score = \frac{1}{M} \sum_{i=1}^{m} \sum_{j=1}^{n}d_{ij} $$
+其中M为所有简历中待识别字段中的总汉字数量，m为简历的数量，n为简历中待识别的字段数量，dij为第i份简历中第j个字段的编辑距离。
+本次比赛的难点在于手写体的识别。由于汉字字符多，手写随意性大，相似和混淆汉字对多，另外公开提供的手写训练集也少，所以这是这次比赛的最大难点。
+配准背景知识图像配准(regist
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -602,7 +617,7 @@ TVM 编译1234cd /mntmkdir build &amp;&amp; cd buildcmake .. -DUSE_LLVM=ON -DUSE
 其中在初始化的时候，选取的是SGD(stochastic gradient descent)算法，在该算法运行的过程中，体现了spark的分布式运行。
 MlLib中SVM实现以下是svm的类的关系图（网上download的）：
 
-一. 程序入口1234567891011121314151617
+一. 程序入口12345678910111213141516171819202122232425262728293031class SVMWithSGD private (    private var stepSize: Double,    private var numIterations: Int,    private var regParam: Double,    private var miniBatchFraction: Double)  extends GeneralizedLinearAlgorithm[SVMModel] with Serializable &#123;    // 定义了损失函数和优化函数  private val gradient = new HingeGradient()  private val updater = new SquaredL2Updater()  @Since("0.8.0")  // new了一个梯度下降的类，命名为optimizer  override val optimizer = new GradientDescent(gradient, updater)    .setStepSize(stepSize)    .setNumIterations(numIterations)    .setRegParam(regParam)    .setMiniBatchFracti
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -728,7 +743,7 @@ MlLib中SVM实现以下是svm的类的关系图（网上download的）：
       
         
           
-          KMeans例子代码1234567891011121314151617181920//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/import org.apache.spark.ml.clustering.&#123;KMeans,KMeansModel&#125;import org.apache.spark.ml.linalg.Vectorimport o
+          KMeans例子代码1234567891011121314151617181920//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/import org.apache.spark.ml.clustering.&#123;KMeans,KMeansModel&#125;import org.apache.spark.ml.linalg.Vectorimport org.apache.spark.ml.linalg.Vectors // 原文是Vectors，但是出错，经过搜索发现是Vector :http://lxw1234.com/archives/2016/01/605.htmimport spark.implicits._   //开启隐式转换case class model_instance (features: Vector)    //开启隐式转换和创建这个model_instance（好像）是调用 .toDF() 的必要条件 val rawData = sc.textFile("hdfs://lotus02:9000/user/chzhou/data.txt")val df = rawData.map(line =&gt;    &#123; model_instance( Vectors.dense(line.split(",").filter(p =&gt; p.matches("\\d*(\\.?)\\d*"))    // '\\d'为匹配数字        .map(_.toDouble)) )&#125;).toDF()val kmeansmodel = new KMeans().    setK(3).    setFeaturesCol("features").    setPredictionCol("pre
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -861,7 +876,45 @@ MlLib中SVM实现以下是svm的类的关系图（网上download的）：
 enclave 如何与 不信任区（uRTS) 的data 做交互？
 
 （疑问）
-data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函
+data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函数还是sgx？
+
+如果是外部函数，因为其在不信任区，有风险
+
+如果是SGX来加密，那么是如何来操作的？
+
+
+
+
+三. 流程
+在SGX内部实现batcher’s sort 算法
+准备数据，确定SGX如何读写数据
+根据数据修改算法接口
+进行测试
+
+四. 技术点
+batcher sort
+
+
+
+
+Batcher排序网络是由一系列Batcher比较器（Batcher’s Comparator）组成的。Batcher比较器是指在两个输入端给定输入x,y，再在两个输出端输出最大值max{x,y}和最小值min{x,y}。
+长度为2的倍数。
+data-independent
+
+
+SGX文件结构
+
+模块
+
+Untrusted Run-Time System (uRTS) – code that executes outside of the Intel SGXenclave environment and performs functions such as:
+
+Loading and managing an enclave
+
+Making calls to an enclave and receiving calls from within an enclave
+
+
+
+Trusted Run-Time System (tRTS) – code that executes within an In
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -989,7 +1042,7 @@ data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS �
           
           Enclave文件结构大致总结一下Enclave的程序文件结构，参考的结构是Ubuntu 16.04 Desktop Intel SGX Linux 2.2 Release中的SampleCode文件。
 这里以文件中SampleEnclave文件目录为例。
-12345678910111213141516171819202122232425262728293031323334353637383940
+1234567891011121314151617181920212223242526272829303132333435363738394041424344.├── App│   ├── App.cpp│   ├── App.h│   ├── Edger8rSyntax│   │   ├── Arrays.cpp│   │   ├── Functions.cpp│   │   ├── Pointers.cpp│   │   └── Types.cpp│   └── TrustedLibrary│       ├── Libc.cpp│       ├── Libcxx.cpp│       └── Thread.cpp├── Enclave│   ├── config.01.xml│   ├── config.02.xml│   ├── config.03.xml│   ├── config.04.xml│   ├── Edger8rSyntax│   │   ├── Arrays.cpp│   │   ├── Arrays.edl│   │   ├── Functions.cpp│   │   ├── Functions.edl│   │   ├── Pointers.cpp│   │   ├── Pointers.edl│   │   ├── Types.cpp│   │   └── Types.edl│   ├── Enclave.config.xml│   ├── Enclave.cpp│   ├── Encl
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1119,7 +1172,22 @@ data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS �
 EPC是什么？物理位置在哪里？
 
 EPC:Enclave Page Cache.
-The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of DRAM. (which is not on CPU and it
+The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of DRAM. (which is not on CPU and it is MAIN MEMORY)
+
+
+注：PRM:Processor Reserved Memory
+(参考链接)
+
+谁对EPC有读取权限？
+应用程序由可信部分和不可信部分构成。只有可信函数被调用，才能访问EPC。其他均被阻挡。参考链接
+
+
+现在的EPC是多大？
+
+因为EPC在内存中，而内存又被多个其他进程使用，为了不产生冲突，经过Intel分析后将大小设置为定值.参考链接
+对于Win：如果OEM支持PRMRR选项（没有查到PRMRR准确定义，大概就是个选项），那么可将大小设置为32 MB, 64 MB or 128 MB。BIOS中默认大小为 128 MB.参考链接-官网
+对于Linux：因为 Linux支持 paging 技术，而Win不支持。所以在Linux中可以突破Win的限制，在所参考的链接里大小最大达到了4G. 参考链接-时间为16年到17年初
+在上一条的参考链接里，有条回答进行了总结：“The physical protected memory is limited to the PRMRR size set in BIOS and the max we support at this time is 128MB in Skylake. The reason why you are able to set the heapsize you set is because
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1248,7 +1316,14 @@ The contents of enclaves and the associated data structures are stored in the En
           
 Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？
 
-Operations which can cause a shuffle include repartition operations like repartition and coalesce, ‘ByKey’ operations (except for count
+Operations which can cause a shuffle include repartition operations like repartition and coalesce, ‘ByKey’ operations (except for counting) like groupByKey and reduceByKey, and join operations like cogroup and join RDD doc
+
+
+repartition operations: repartition, coalesce
+‘ByKey’ operations: groupByKey, reduceByKey, aggregateByKey, sortByKey  (countByKey is an Actions operation, so it isn’t a shuffle operation)
+join operations: cogroup, join
+Another operation which takes “numPartitions” as an argument is distinct operation
+RDD is stored in memory by default. There are  seven storage level. The full set of storage levels can be found here. MEMORY_ONLY is the default level, which means when data can’t fit in memory, some partitio
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1378,7 +1453,15 @@ Operations which can cause a shuffle include repartition operations like reparti
 为了打字方便，以下 Web-UI统一拿 web 代替。
 
 启动spark-shell
-1chzhou@lotus02:/usr/s
+1chzhou@lotus02:/usr/spark/bin$ spark-shell --conf spark.logLineage=true --master spark://lotus02:7077 --deploy-mode client --jars file:///home/chzhou/mltr/machine-learning/target/scala-2.11/movielens-als_2.11-0.1.jar
+
+操作的时候把程序用sbt打包的jar包导入，这样在shell里就可以调用原程序自定义的函数
+指定master和deploy-mode，以分布式运行
+使得spark.logLineage 为true，这样就能在控制台自动输出 RDD 的lineage
+
+
+导入库
+123456789import java.io.Fileimport scala.io.Sourceimport org.apache.log4j.Loggerimport org.apache.log4j.Levelimport org.apache.spark.SparkConfimport org.apache.spark.SparkContextimport org.apache.spark.SparkContext._import org.apache.spark.rdd._import org.apache.spark.mll
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1511,7 +1594,39 @@ Hackthiscontract.io  (地址)
 
 
 trail of bits/not-so-smart-contracts (地址)
-contains 
+contains examples of common Ethereum smart contract vulnerabilities, including code from real smart contracts
+合约类型
+Honeypots：6个
+Integer overflow：1个
+Missing constructor：2个
+Race condition（TOD）：1个
+Reentrancy：1个
+Unchecked external call：1个
+Unprotected function：2个
+Variable shadowing：1个
+Wrong interface：1个
+
+
+Oyente能检测出来的（未实际检测，仅理论)
+Integer overflow
+Race condition（TOD）
+Reentrancy
+
+
+
+
+GOATCasino (地址)
+只有一个，主文件是Lottery.sol，类似于在《Survey of Smart Contract Attacks》论文中的4.3节Multi-player games
+
+
+ethernaut (地址1) (地址2)
+同样也是游戏网站，提供的例子比Hackthiscontract.io要多一些
+有fallback，Reentrancy等漏洞合约
+
+
+capturetheether(地址)
+
+tokensale: Intege
           ...
           <!--noindex-->
           <div class="post-button text-center">

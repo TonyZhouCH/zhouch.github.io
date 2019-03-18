@@ -343,8 +343,18 @@
           从名字可以看出，这一节是对上一节知识的应用。在这一节中，介绍了在搜索引擎中如何利用AND、OR等进行精确查找所需内容，还有一些逻辑谜题、电路实现逻辑运算的内容。整节比较简单易懂。
 [TOC]
 
-1. Introduction2. Translating English Sentence把自然语言翻译为逻辑语言的练习。自然语言具有不精确、磨棱两可、省略许多背景信息的特点，而逻辑语言则要求准确无误，所
-          ...
+1. Introduction2. Translating English Sentence把自然语言翻译为逻辑语言的练习。自然语言具有不精确、磨棱两可、省略许多背景信息的特点，而逻辑语言则要求准确无误，所以在翻译过程中一定要认真，理清关系。
+3. System Specifications这个小节是说当几个命题组成一个”system”的时候，必须保持“一致性”，不能互相矛盾。
+4. Boolean Searches
+AND去搜索两个目标都存在的网页。
+OR去搜索只要有两者之一或者两者都有的网页。
+NOT去搜索两者剔除其中一者的网页。
+
+5. Logic Puzzles介绍了几个运用逻辑的小问题，类似于脑筋急转弯。
+6. Logic Circuits简单介绍了逻辑运算的电路实现形式，分别有“非门”、“或门”、“与门”三种。
+
+
+          
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/04/24/离散数学：1-2-Applications-of-Propositional-Logic/#more" rel="contents">
@@ -483,7 +493,23 @@ either true or false
 Truth Table
 几种基本运算符号
 p    ﹁p
-p∧q，
+p∧q，意为”p and q” 
+p∨q，意为”p or q”，这个是”inclusive or”
+p⊕q，意为”p xor q”，这个是”exclusive or”。这里的exclusive即为”排除“之意。书中的解释很好，是”Students who have taken calculus or computer science, but not both, can enroll in this class.”也就是说只能二取一，但不能都取。这样也就解释了为什么在进行二进制异或计算时，只有0和1在一起才能计算出1，0和0 或者1 和1只能得到0
+
+
+
+3. Conditional Statements
+p→q
+
+if p, then q
+
+p is hypothesis, q is conclusion
+
+statement is False when p is true and q is false, and True otherwise
+（陈述的真值表书中的解释很完美，是这样解释的：选举人在竞选时说：“if我当选了，then我就会降低税率”。倘若这个选举人真的竞选成功了，那么人们就会期待他降低税率。但是他没有降低税率，这样我们此时就能说这个陈述是假的。其他情况我们都只能说时真的，无论这个选举人有无竞选上。）
+
+等价的表述还有p only if q和q unless ﹁p（从真值表去
           ...
           <!--noindex-->
           <div class="post-button text-center">
