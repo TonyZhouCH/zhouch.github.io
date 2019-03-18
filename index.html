@@ -1569,14 +1569,9 @@
 <li><p>输出ratings的数据总共有1000209条数据</p>
 </li>
 <li><p>从web上查看stage信息</p>
+<p><img src="/images/SparkML电影推荐流程分析/s1.PNG" alt="s1"></p>
+<p>显示cache的是MapPartitionsRDD[3]，这与在第4步中的控制台输出是一样的。</p>
 </li>
-</ul>
-</li>
-</ol>
-<pre><code>![s1](/images/SparkML电影推荐流程分析/s1.PNG)
-
-显示cache的是MapPartitionsRDD[3]，这与在第4步中的控制台输出是一样的。
-</code></pre><ul>
 <li><p>查看slave存储</p>
 <p><img src="/images/SparkML电影推荐流程分析/s1 rec.PNG" alt="s1 rec"></p>
 <p>08上有503331条record，09上有1000209-503331=496878条数据</p>
@@ -1584,7 +1579,7 @@
 <li><p>storage界面信息和上一步差不多，不截图显示了。</p>
 </li>
 </ul>
-<ol start="7">
+</li>
 <li><p>接下来统计用户数</p>
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numUsers = ratings.map(_._2.user).distinct.count</span><br><span class="line">numUsers: <span class="type">Long</span> = <span class="number">6040</span></span><br></pre></td></tr></table></figure>
 <p>这里的map语句不太懂（推测是对ratings的字段进行操作）。。。然后进行了distinct操作，找出unique的用户，然后count进行计数。这里得到有6040名用户</p>
