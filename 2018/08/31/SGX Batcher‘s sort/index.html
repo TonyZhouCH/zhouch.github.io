@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="SGX,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="SGX enclave一. 目标通过在SGX中实现 batcher‘s sort，进行 enclave runtime 测试 二. 难点 整个 enclave 的程序逻辑是什么？  enclave 如何与 不信任区（uRTS) 的data 做交互？  （疑问） data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函">
+<meta name="keywords" content="SGX">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SGX Batcher&#39;s sort">
+<meta property="og:url" content="http://chzhou.cc/2018/08/31/SGX Batcher‘s sort/index.html">
+<meta property="og:site_name" content="周的小站">
+<meta property="og:description" content="SGX enclave一. 目标通过在SGX中实现 batcher‘s sort，进行 enclave runtime 测试 二. 难点 整个 enclave 的程序逻辑是什么？  enclave 如何与 不信任区（uRTS) 的data 做交互？  （疑问） data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Batcher_Odd-Even_Mergesort_for_eight_inputs.svg/356px-Batcher_Odd-Even_Mergesort_for_eight_inputs.svg.png">
+<meta property="og:image" content="https://i.loli.net/2018/08/31/5b88cd1ddf834.jpg">
+<meta property="og:updated_time" content="2019-03-18T14:20:17.330Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SGX Batcher&#39;s sort">
+<meta name="twitter:description" content="SGX enclave一. 目标通过在SGX中实现 batcher‘s sort，进行 enclave runtime 测试 二. 难点 整个 enclave 的程序逻辑是什么？  enclave 如何与 不信任区（uRTS) 的data 做交互？  （疑问） data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函">
+<meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Batcher_Odd-Even_Mergesort_for_eight_inputs.svg/356px-Batcher_Odd-Even_Mergesort_for_eight_inputs.svg.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://chzhou.cc/2018/08/31/SGX Batcher‘s sort/">
+
+
+
+
+
+  <title>SGX Batcher's sort | 周的小站</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">周的小站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-resume">
+          <a href="/resume/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            简历
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/08/31/SGX Batcher‘s sort/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SGX Batcher's sort</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-31T13:30:46+08:00">
+                2018-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="SGX-enclave"><a href="#SGX-enclave" class="headerlink" title="SGX enclave"></a>SGX enclave</h1><h2 id="一-目标"><a href="#一-目标" class="headerlink" title="一. 目标"></a>一. 目标</h2><p>通过在SGX中实现 batcher‘s sort，进行 enclave runtime 测试</p>
+<h2 id="二-难点"><a href="#二-难点" class="headerlink" title="二. 难点"></a>二. 难点</h2><ol>
+<li><p>整个 enclave 的程序逻辑是什么？</p>
+</li>
+<li><p>enclave 如何与 不信任区（uRTS) 的data 做交互？</p>
+</li>
+<li><p>（疑问）</p>
+<p>data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函数还是sgx？</p>
+<ul>
+<li><p>如果是外部函数，因为其在不信任区，有风险</p>
+</li>
+<li><p>如果是SGX来加密，那么是如何来操作的？</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="三-流程"><a href="#三-流程" class="headerlink" title="三. 流程"></a>三. 流程</h2><ol>
+<li>在SGX内部实现batcher’s sort 算法</li>
+<li>准备数据，确定SGX如何读写数据</li>
+<li>根据数据修改算法接口</li>
+<li>进行测试</li>
+</ol>
+<h2 id="四-技术点"><a href="#四-技术点" class="headerlink" title="四. 技术点"></a>四. 技术点</h2><ol>
+<li><p>batcher sort<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Batcher_Odd-Even_Mergesort_for_eight_inputs.svg/356px-Batcher_Odd-Even_Mergesort_for_eight_inputs.svg.png" alt="batcher.jpg"></p>
+<p><img src="https://i.loli.net/2018/08/31/5b88cd1ddf834.jpg" alt="batcher.jpg"></p>
+</li>
+</ol>
+<ul>
+<li>Batcher排序网络是由一系列Batcher比较器（Batcher’s Comparator）组成的。Batcher比较器是指在两个输入端给定输入x,y，再在两个输出端输出最大值max{x,y}和最小值min{x,y}。</li>
+<li>长度为2的倍数。</li>
+<li>data-independent</li>
+</ul>
+<ol start="2">
+<li><p>SGX文件结构</p>
+<ol>
+<li><p>模块</p>
+<ul>
+<li><p>Untrusted Run-Time System (uRTS) – code that executes outside of the Intel SGX<br>enclave environment and performs functions such as:</p>
+<ul>
+<li><p>Loading and managing an enclave</p>
+</li>
+<li><p>Making calls to an enclave and receiving calls from within an enclave</p>
+</li>
+</ul>
+</li>
+<li><p>Trusted Run-Time System (tRTS) – code that executes within an Intel SGX enclave envir-<br>  onment and performs functions such as:</p>
+<ul>
+<li><p>Receiving calls into the enclave and making calls outside of an enclave</p>
+</li>
+<li><p>Managing the enclave itself</p>
+</li>
+<li><p>Standard C/C++ libraries and run-time environment</p>
+</li>
+</ul>
+</li>
+<li>Edge Routines – functions that may run outside the enclave (untrusted edge routines) or inside the enclave (trusted edge routines) and serve to bind a call from the applic-ation with a function inside the enclave or a call from the enclave with a function in the application</li>
+<li>3rd Party Libraries – for the purpose of this document, this is any library that has been tailored to work inside the Intel SGX enclave environment</li>
+</ul>
+</li>
+<li><p>两个术语：</p>
+<ul>
+<li>ECall：“Enclave Call” a call made into an interface function within the enclave</li>
+<li>OCall: “Out Call” a call made from within the enclave to the outside application</li>
+</ul>
+</li>
+<li><p>实际文件结构</p>
+<ul>
+<li><p>./App </p>
+<p>该文件夹存放应用程序中的<strong>不可信</strong>代码部分</p>
+<ul>
+<li>App.cpp文件：该文件是应用程序中的不可信部分代码，其中包括了创建Enclave及销毁Enclave的代码，也定义了一些相关的返回码供使用者查看Enclave程序的执行状态。其中的main函数是整个项目的入口函数。</li>
+</ul>
+</li>
+<li><p>./Enclave</p>
+<p>该文件夹存放应用程序中的可信代码部分和可信与不可信代码接口文件</p>
+<ul>
+<li>Enclave.config.xml文件：该文件是Enclave的配置文件，定义了Enclave中stack，heap等大小信息</li>
+<li>Enclave.cpp文件：该文件是应用程序中的可信部分代码，包括了可信函数的实现</li>
+<li>Enclave.edl文件：该文件是Enclave的接口定义文件，定义了不可信代码调用可信代码的ECALL函数接口和可信代码调用不可信代码的OECALL函数接口</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SGX/" rel="tag"># SGX</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/21/Enclave文件结构/" rel="next" title="Enclave文件结构">
+                <i class="fa fa-chevron-left"></i> Enclave文件结构
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/11/Spark中K-Means doc/" rel="prev" title="Spark中KMeans doc">
+                Spark中KMeans doc <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
+          <p class="site-author-name" itemprop="name">Zhou</p>
+           
+              <p class="site-description motion-element" itemprop="description">周的小站</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/archive/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SGX-enclave"><span class="nav-number">1.</span> <span class="nav-text">SGX enclave</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-目标"><span class="nav-number">1.1.</span> <span class="nav-text">一. 目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-难点"><span class="nav-number">1.2.</span> <span class="nav-text">二. 难点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-流程"><span class="nav-number">1.3.</span> <span class="nav-text">三. 流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-技术点"><span class="nav-number">1.4.</span> <span class="nav-text">四. 技术点</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

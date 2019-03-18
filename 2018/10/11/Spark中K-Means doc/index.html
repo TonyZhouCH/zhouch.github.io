@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Spark,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="KMeans例子代码1234567891011121314151617181920//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/import org.apache.spark.ml.clustering.&amp;#123;KMeans,KMeansModel&amp;#125;import org.apache.spark.ml.linalg.Vectorimport o">
+<meta name="keywords" content="Spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark中KMeans doc">
+<meta property="og:url" content="http://chzhou.cc/2018/10/11/Spark中K-Means doc/index.html">
+<meta property="og:site_name" content="周的小站">
+<meta property="og:description" content="KMeans例子代码1234567891011121314151617181920//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/import org.apache.spark.ml.clustering.&amp;#123;KMeans,KMeansModel&amp;#125;import org.apache.spark.ml.linalg.Vectorimport o">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://i.loli.net/2018/10/11/5bbea460c3933.png">
+<meta property="og:image" content="https://i.loli.net/2018/10/11/5bbea4852f2a3.png">
+<meta property="og:updated_time" content="2019-03-18T14:23:23.235Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark中KMeans doc">
+<meta name="twitter:description" content="KMeans例子代码1234567891011121314151617181920//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/import org.apache.spark.ml.clustering.&amp;#123;KMeans,KMeansModel&amp;#125;import org.apache.spark.ml.linalg.Vectorimport o">
+<meta name="twitter:image" content="https://i.loli.net/2018/10/11/5bbea460c3933.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://chzhou.cc/2018/10/11/Spark中K-Means doc/">
+
+
+
+
+
+  <title>Spark中KMeans doc | 周的小站</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">周的小站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-resume">
+          <a href="/resume/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            简历
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/10/11/Spark中K-Means doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark中KMeans doc</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-11T09:17:12+08:00">
+                2018-10-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="KMeans"><a href="#KMeans" class="headerlink" title="KMeans"></a>KMeans</h1><h2 id="例子代码"><a href="#例子代码" class="headerlink" title="例子代码"></a>例子代码</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.ml.clustering.&#123;<span class="type">KMeans</span>,<span class="type">KMeansModel</span>&#125;</span><br><span class="line"><span class="keyword">import</span> org.apache.spark.ml.linalg.<span class="type">Vector</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.ml.linalg.<span class="type">Vectors</span> <span class="comment">// 原文是Vectors，但是出错，经过搜索发现是Vector :http://lxw1234.com/archives/2016/01/605.htm</span></span><br><span class="line"><span class="keyword">import</span> spark.implicits._   <span class="comment">//开启隐式转换</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">model_instance</span> (<span class="params">features: <span class="type">Vector</span></span>)    <span class="title">//开启隐式转换和创建这个model_instance（好像）是调用</span> .<span class="title">toDF</span>(<span class="params"></span>) <span class="title">的必要条件</span></span></span><br><span class="line"><span class="class"> </span></span><br><span class="line"><span class="class"><span class="title">val</span> <span class="title">rawData</span> </span>= sc.textFile(<span class="string">"hdfs://lotus02:9000/user/chzhou/data.txt"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> df = rawData.map(line =&gt;</span><br><span class="line">    &#123; model_instance( <span class="type">Vectors</span>.dense(line.split(<span class="string">","</span>).filter(p =&gt; p.matches(<span class="string">"\\d*(\\.?)\\d*"</span>))    <span class="comment">// '\\d'为匹配数字</span></span><br><span class="line">        .map(_.toDouble)) )&#125;).toDF()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> kmeansmodel = <span class="keyword">new</span> <span class="type">KMeans</span>().</span><br><span class="line">    setK(<span class="number">3</span>).</span><br><span class="line">    setFeaturesCol(<span class="string">"features"</span>).</span><br><span class="line">    setPredictionCol(<span class="string">"prediction"</span>).</span><br><span class="line">    fit(df)</span><br></pre></td></tr></table></figure>
+<p>数据采用的是<a href="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/03/iris.txt" target="_blank" rel="noopener">iris</a>数据，有四个实数值的特征，分别代表花朵四个部位的尺寸，以及该样本对应鸢尾花的亚种类型（共有3种亚种类型）。</p>
+<h2 id="过程分析"><a href="#过程分析" class="headerlink" title="过程分析"></a>过程分析</h2><p>对程序在spark-shell中按条输入，在最后一步 KMeans.fit(df) 的时候整个程序转换才开始进行。</p>
+<p>整个程序总共有9个job，如下图所示：</p>
+<p><img src="https://i.loli.net/2018/10/11/5bbea460c3933.png" alt="job.png"></p>
+<p>总共分为13个stage，如下图所示：</p>
+<p><img src="https://i.loli.net/2018/10/11/5bbea4852f2a3.png" alt="stage.png"></p>
+<p>虽然有13个，但是总共可以分为4个阶段，分别对应kmeans实现的4个阶段</p>
+<h2 id="spark中kmeans实现"><a href="#spark中kmeans实现" class="headerlink" title="spark中kmeans实现"></a>spark中kmeans实现</h2><p>本次导入的库为spark中ml包。实际上ml中的kmeans只是对mllib中kmeans的封装，mllib.KMeans的接口是基于RDD的，而ml.KMeans的接口是基于DataFrame的。所以在调用ml.KMeans的fit( )函数后，内部其实是对DataFrame进行转换，转换为RDD形式，再将数据作为输入对mllib.KMeans进行调用从而训练模型，训练完后再返回给ml.KMeans。</p>
+<p>mllib.KMeans中，在选取初始点时，实际上默认的算法采用的是KMeans||算法（算法的lineage是：普通kmeans -&gt; kmeans++ -&gt; KMeans||)。其实最主要的不同之处在于选取初始质心的策略上。经典的Kmeans算法的缺点在于需要预先指定k值以及对初始选取的质心比较敏感。为了解决该问题提出了<a href="https://en.wikipedia.org/wiki/K-means++" target="_blank" rel="noopener">kmeans++算法</a>，对于质心的选择进行了改变，但是问题在于算法必须顺序执行，无法并行扩展。针对此问题又提出了KMeans||算法，<a href="http://theory.stanford.edu/~sergei/papers/vldb12-kmpar.pdf" target="_blank" rel="noopener">论文在这里</a>。</p>
+<h3 id="ml-KMeans"><a href="#ml-KMeans" class="headerlink" title="ml.KMeans"></a>ml.KMeans</h3><p>在ml中的kmens中，先将mllib中的kmeans包进行引入，同时为了避免和ml中原有的kmeans类混淆，重新命名为MLlibKMeans，MLlibKMeansModel。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.mllib.clustering.&#123;<span class="type">DistanceMeasure</span>, <span class="type">KMeans</span> =&gt; <span class="type">MLlibKMeans</span>, <span class="type">KMeansModel</span> =&gt; <span class="type">MLlibKMeansModel</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>函数的训练入口是fit()函数，从这里开始，并且先将DataFrame转化为rdd形式</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">fit</span></span>(dataset: <span class="type">Dataset</span>[_]): <span class="type">KMeansModel</span> = instrumented &#123; instr =&gt;</span><br><span class="line">    transformSchema(dataset.schema, logging = <span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> handlePersistence = dataset.storageLevel == <span class="type">StorageLevel</span>.<span class="type">NONE</span></span><br><span class="line">    <span class="keyword">val</span> instances = <span class="type">DatasetUtils</span>.columnToOldVector(dataset, getFeaturesCol)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (handlePersistence) &#123;</span><br><span class="line">      instances.persist(<span class="type">StorageLevel</span>.<span class="type">MEMORY_AND_DISK</span>)</span><br><span class="line">    &#125;   <span class="comment">//将rdd的存储等级设置为StorageLevel.MEMORY_AND_DISK</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 不知道在干什么。。。是调用的ml库自己的instrument方法（没影响）</span></span><br><span class="line">    instr.logPipelineStage(<span class="keyword">this</span>)</span><br><span class="line">    instr.logDataset(dataset)</span><br><span class="line">    instr.logParams(<span class="keyword">this</span>, featuresCol, predictionCol, k, initMode, initSteps, distanceMeasure,maxIter, seed, tol)</span><br></pre></td></tr></table></figure>
+<p>然后将ml中自己的kmeans模型参数送入mllib的模型中，命名为algo.</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> algo = <span class="keyword">new</span> <span class="type">MLlibKMeans</span>()</span><br><span class="line">      .setK($(k))</span><br><span class="line">      .setInitializationMode($(initMode))</span><br><span class="line">      .setInitializationSteps($(initSteps))</span><br><span class="line">      .setMaxIterations($(maxIter))</span><br><span class="line">      .setSeed($(seed))</span><br><span class="line">      .setEpsilon($(tol))</span><br><span class="line">      .setDistanceMeasure($(distanceMeasure))</span><br></pre></td></tr></table></figure>
+<p>调用mllib中kmeans的run()函数，进行运算。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> parentModel = algo.run(instances, <span class="type">Option</span>(instr))</span><br></pre></td></tr></table></figure>
+<p>此时进入mllib中的kmeans模型实现函数。</p>
+<h3 id="mllib-KMeans"><a href="#mllib-KMeans" class="headerlink" title="mllib.KMeans"></a>mllib.KMeans</h3><p>在mllib.kmeans中，执行的大致顺序如下：</p>
+<ol>
+<li>将rdd中的point变为（point，norm）形式。其中point的存储形式是vector，norm是二范数，即point的向量模。有了模之后方便以后计算各个点之间的距离。</li>
+<li>用initRandom或者initKMeansParallel方法进行对初始中心点的选择。其中默认的方式是initKmeansParallel方法，也就是KMeans||算法</li>
+<li>在初始的中心点选择好后，进行对模型的收敛计算，直到达到允许的误差值内或者达到最大迭代计算次数。</li>
+<li>返回模型</li>
+</ol>
+<h4 id="一-rdd中point转换"><a href="#一-rdd中point转换" class="headerlink" title="一. rdd中point转换"></a>一. rdd中point转换</h4><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[spark] <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(</span><br><span class="line">      data: <span class="type">RDD</span>[<span class="type">Vector</span>],</span><br><span class="line">      instr: <span class="type">Option</span>[<span class="type">Instrumentation</span>]): <span class="type">KMeansModel</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (data.getStorageLevel == <span class="type">StorageLevel</span>.<span class="type">NONE</span>) &#123;</span><br><span class="line">      logWarning(<span class="string">"The input data is not directly cached, which may hurt performance if its"</span></span><br><span class="line">        + <span class="string">" parent RDDs are also uncached."</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 计算模并且缓存下来</span></span><br><span class="line">    <span class="keyword">val</span> norms = data.map(<span class="type">Vectors</span>.norm(_, <span class="number">2.0</span>))</span><br><span class="line">    norms.persist()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将模与原来的rdd中的点zip在一起</span></span><br><span class="line">    <span class="keyword">val</span> zippedData = data.zip(norms).map &#123; <span class="keyword">case</span> (v, norm) =&gt;</span><br><span class="line">      <span class="keyword">new</span> <span class="type">VectorWithNorm</span>(v, norm)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 调用runAlgorithm()进行计算</span></span><br><span class="line">    <span class="keyword">val</span> model = runAlgorithm(zippedData, instr)</span><br></pre></td></tr></table></figure>
+<h4 id="二-初始化中心点"><a href="#二-初始化中心点" class="headerlink" title="二. 初始化中心点"></a>二. 初始化中心点</h4><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">runAlgorithm</span></span>(</span><br><span class="line">      data: <span class="type">RDD</span>[<span class="type">VectorWithNorm</span>],</span><br><span class="line">      instr: <span class="type">Option</span>[<span class="type">Instrumentation</span>]): <span class="type">KMeansModel</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> sc = data.sparkContext</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> initStartTime = <span class="type">System</span>.nanoTime()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> distanceMeasureInstance = <span class="type">DistanceMeasure</span>.decodeFromString(<span class="keyword">this</span>.distanceMeasure)</span><br><span class="line"></span><br><span class="line">    <span class="comment">//在这里可以看出，除非指明初始化的方法为initRandom，否则默认为initKmeansParallel</span></span><br><span class="line">    <span class="keyword">val</span> centers = initialModel <span class="keyword">match</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="type">Some</span>(kMeansCenters) =&gt;</span><br><span class="line">        kMeansCenters.clusterCenters.map(<span class="keyword">new</span> <span class="type">VectorWithNorm</span>(_))</span><br><span class="line">      <span class="keyword">case</span> <span class="type">None</span> =&gt;</span><br><span class="line">        <span class="keyword">if</span> (initializationMode == <span class="type">KMeans</span>.<span class="type">RANDOM</span>) &#123;</span><br><span class="line">          initRandom(data)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          initKMeansParallel(data, distanceMeasureInstance)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>下面进入initKMeansParallel方法:</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[clustering] <span class="function"><span class="keyword">def</span> <span class="title">initKMeansParallel</span></span>(data: <span class="type">RDD</span>[<span class="type">VectorWithNorm</span>],</span><br><span class="line">      distanceMeasureInstance: <span class="type">DistanceMeasure</span>): <span class="type">Array</span>[<span class="type">VectorWithNorm</span>] = &#123;</span><br><span class="line">    <span class="comment">// 初始化costs</span></span><br><span class="line">    <span class="keyword">var</span> costs = data.map(_ =&gt; <span class="type">Double</span>.<span class="type">PositiveInfinity</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在rdd中随机选一个点</span></span><br><span class="line">    <span class="keyword">val</span> seed = <span class="keyword">new</span> <span class="type">XORShiftRandom</span>(<span class="keyword">this</span>.seed).nextInt()</span><br><span class="line">    <span class="keyword">val</span> sample = data.takeSample(<span class="literal">false</span>, <span class="number">1</span>, seed)</span><br><span class="line">    </span><br><span class="line">    require(sample.nonEmpty, <span class="string">s"No samples available from <span class="subst">$data</span>"</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将随机选的那一个点作为第一个中心点</span></span><br><span class="line">    <span class="keyword">val</span> centers = <span class="type">ArrayBuffer</span>[<span class="type">VectorWithNorm</span>]()</span><br><span class="line">    <span class="keyword">var</span> newCenters = <span class="type">Seq</span>(sample.head.toDense)</span><br><span class="line">    centers ++= newCenters</span><br></pre></td></tr></table></figure>
+<p>takesample此时发生了rdd的计算，这时候的过程对应于stage 0 和 stage 1。</p>
+<p>接下来通过多次循环计算，取得所有的初始化中心点。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> step = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//用来存储每次产生的中心点，并且是broadcast类型</span></span><br><span class="line"><span class="keyword">val</span> bcNewCentersList = <span class="type">ArrayBuffer</span>[<span class="type">Broadcast</span>[_]]()</span><br><span class="line"><span class="keyword">while</span> (step &lt; initializationSteps) &#123;</span><br><span class="line">    <span class="comment">// 每次把上一次算出来的newCenters广播出去</span></span><br><span class="line">    <span class="keyword">val</span> bcNewCenters = data.context.broadcast(newCenters)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 把新算出来的点加到里面</span></span><br><span class="line">    bcNewCentersList += bcNewCenters</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 计算data里面点的cost值</span></span><br><span class="line">    <span class="keyword">val</span> preCosts = costs</span><br><span class="line">    costs = data.zip(preCosts).map &#123; <span class="keyword">case</span> (point, cost) =&gt;</span><br><span class="line">        math.min(distanceMeasureInstance.pointCost(bcNewCenters.value, point), cost)</span><br><span class="line">    &#125;.persist(<span class="type">StorageLevel</span>.<span class="type">MEMORY_AND_DISK</span>)</span><br><span class="line">    <span class="keyword">val</span> sumCosts = costs.sum()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将broadcast变量销毁</span></span><br><span class="line">    bcNewCenters.unpersist(blocking = <span class="literal">false</span>)</span><br><span class="line">    preCosts.unpersist(blocking = <span class="literal">false</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 开始选点，每次循环根据距中心点的距离成比例地选取 2 * k 个点</span></span><br><span class="line">    <span class="keyword">val</span> chosen = data.zip(costs).mapPartitionsWithIndex &#123; (index, pointCosts) =&gt; <span class="keyword">val</span> rand = <span class="keyword">new</span> <span class="type">XORShiftRandom</span>(seed ^ (step &lt;&lt; <span class="number">16</span>) ^ index)</span><br><span class="line">   pointCosts.filter &#123; <span class="keyword">case</span> (_, c) =&gt; rand.nextDouble() &lt; <span class="number">2.0</span> * c * k / sumCosts &#125;.map(_._1)</span><br><span class="line">    &#125;.collect()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 把新选择出来地点变为dense格式，命名为newCenters</span></span><br><span class="line">    newCenters = chosen.map(_.toDense)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 把新的center放入到centers里面</span></span><br><span class="line">    centers ++= newCenters</span><br><span class="line">    step += <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对循环得到的centers处理一下，先是转换为vector形式，去重，再转换为VectorWithNorm格式。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> distinctCenters = centers.map(_.vector).distinct.map(<span class="keyword">new</span> <span class="type">VectorWithNorm</span>(_))</span><br></pre></td></tr></table></figure>
+<p>如果找出来的centers比k多，通过LocalKMeans筛检出k个中心点。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (distinctCenters.size &lt;= k) &#123;</span><br><span class="line">      distinctCenters.toArray</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">val</span> bcCenters = data.context.broadcast(distinctCenters)</span><br><span class="line">      <span class="keyword">val</span> countMap = data</span><br><span class="line">        .map(distanceMeasureInstance.findClosest(bcCenters.value, _)._1)</span><br><span class="line">        .countByValue()</span><br><span class="line"></span><br><span class="line">      bcCenters.destroy(blocking = <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> myWeights = distinctCenters.indices.map(countMap.getOrElse(_, <span class="number">0</span>L).toDouble).toArray</span><br><span class="line">      <span class="type">LocalKMeans</span>.kMeansPlusPlus(<span class="number">0</span>, distinctCenters.toArray, myWeights, k, <span class="number">30</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="三-对模型进行收敛计算"><a href="#三-对模型进行收敛计算" class="headerlink" title="三. 对模型进行收敛计算"></a>三. 对模型进行收敛计算</h4><p>初始化选点做完后，将中心点存入到centers中，进行收敛计算，找出最后收敛的点的集合。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (iteration &lt; maxIterations &amp;&amp; !converged) &#123;</span><br><span class="line">      </span><br><span class="line">      <span class="comment">// 用到了累加器，用来记录计算过程中整体的cost值。该变量只能通过关联操作进行“加”运算，并且在各个worker上进行同步</span></span><br><span class="line">      <span class="keyword">val</span> costAccum = sc.doubleAccumulator</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 将中心点的集合通过broadcast广播出去，在每个worker上都有一份该缓存，并且为只读</span></span><br><span class="line">      <span class="keyword">val</span> bcCenters = sc.broadcast(centers)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 对rdd中的各个partition做操作，分别找见各个partition中点的聚类中心</span></span><br><span class="line">      <span class="keyword">val</span> newCenters = data.mapPartitions &#123; points =&gt;</span><br><span class="line">        <span class="comment">// 读取中心点的数值和相关维度</span></span><br><span class="line">        <span class="keyword">val</span> thisCenters = bcCenters.value</span><br><span class="line">        <span class="keyword">val</span> dims = thisCenters.head.vector.size</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 初始化数组，第一个sums数组用来存储各个中心点中的全部点的向量和</span></span><br><span class="line">        <span class="keyword">val</span> sums = <span class="type">Array</span>.fill(thisCenters.length)(<span class="type">Vectors</span>.zeros(dims))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 第二个counts用来记录每个中心点的点簇的数量</span></span><br><span class="line">        <span class="keyword">val</span> counts = <span class="type">Array</span>.fill(thisCenters.length)(<span class="number">0</span>L)</span><br><span class="line"></span><br><span class="line">        <span class="comment">//对每个partition中的各个点做以下操作</span></span><br><span class="line">        points.foreach &#123; point =&gt;</span><br><span class="line">          <span class="comment">// 各个点与每个中心点算距离，返回其中距离最小的。其中bestCenter是中心点在centers中的index，cost是两点之间的距离</span></span><br><span class="line">          <span class="keyword">val</span> (bestCenter, cost) = distanceMeasureInstance.findClosest(thisCenters, point)</span><br><span class="line">          </span><br><span class="line">          <span class="comment">// 在全局上将cost进行累加</span></span><br><span class="line">          costAccum.add(cost)</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 把这个点与所属中心点的向量和存储到sums里面 </span></span><br><span class="line">          distanceMeasureInstance.updateClusterSum(point, sums(bestCenter))</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 该中心点下的点的个数加1</span></span><br><span class="line">          counts(bestCenter) += <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在对每个点做完以上操作后，每个partition中的点对应的中心点及其cost也都计算出来了</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对counts中大于0的进行筛选，返回index （等于0说明该中心点下没有对应的点，自然要删掉）</span></span><br><span class="line">        <span class="comment">// 返回的index形成了一个list，调用map语句对list中的每个index做一层包裹，形成 （index, (sum(index), counts(index)) 的形式</span></span><br><span class="line">        <span class="comment">// 因为mappartition要返回iterator类型，所以在后面加一个iterator</span></span><br><span class="line">        counts.indices.filter(counts(_) &gt; <span class="number">0</span>).map(j =&gt; (j, (sums(j), counts(j)))).iterator</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 下面的reduceByKey对同一个index（也就是同一个中心点）中的数据进行聚合 （因为数据分散在各个worker上）</span></span><br><span class="line">      &#125;.reduceByKey &#123; <span class="keyword">case</span> ((sum1, count1), (sum2, count2)) =&gt;</span><br><span class="line">        <span class="comment">// 对于相同的index，其中的值做以下操作</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将sum2累加到sum1中</span></span><br><span class="line">        axpy(<span class="number">1.0</span>, sum2, sum1)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将count2累加到count1上</span></span><br><span class="line">        (sum1, count1 + count2)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// collectAsMap()将所有聚合后的数据送入到driver端，让driver进行下一步操作</span></span><br><span class="line">        <span class="comment">// mapValues只对数据的value字段进行map操作，从(sum, count)信息中重新计算中心点  （数据是k-v，形式为（index, (sum(index), counts(index))）</span></span><br><span class="line">      &#125;.collectAsMap().mapValues &#123; <span class="keyword">case</span> (sum, count) =&gt;</span><br><span class="line">        distanceMeasureInstance.centroid(sum, count)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="comment">// 以上做完后就把新的中心点存入到了newCenters中</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">// 销毁掉之前centers这个广播变量</span></span><br><span class="line">      bcCenters.destroy(blocking = <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 重新进行计算，看看有没有收敛。要是没有收敛了就继续算</span></span><br><span class="line">      converged = <span class="literal">true</span></span><br><span class="line">      newCenters.foreach &#123; <span class="keyword">case</span> (j, newCenter) =&gt;</span><br><span class="line">        <span class="keyword">if</span> (converged &amp;&amp;</span><br><span class="line">          !distanceMeasureInstance.isCenterConverged(centers(j), newCenter, epsilon)) &#123;</span><br><span class="line">          converged = <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        centers(j) = newCenter</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      cost = costAccum.value</span><br><span class="line">      iteration += <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>剩下的代码就是输出一些log信息，最后返回kmeans模型。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li><p>分布式的计算体现在哪里？</p>
+<p>对模型进行收敛计算中，体现分布式的地方有两点：</p>
+<ul>
+<li><p>循环开始时：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> costAccum = sc.doubleAccumulator</span><br><span class="line"><span class="keyword">val</span> bcCenters = sc.broadcast(centers)</span><br></pre></td></tr></table></figure>
+<p>第一个costAccum是spark的累加器的使用，它在各个worker中间进行同步。它的值仅能够通过“加”改变，所以常常被用来计数，并且只有driver能够读取它的值。在kmeans中用来记录全局的cost值。</p>
+<p>第二个bcCenters是广播变量。driver将中心点的集合通过broadcast广播出去，于是bcCenters在每个worker上都有一份缓存，并且为只读变量。</p>
+</li>
+<li><p>对中心点进行reduceByKey操作后，调用collectAsMap。这个collectAsMap的文档解释是:”Return the key-value pairs in this RDD to the <strong>master</strong> as a Map”。也就是说reduceByKey在reducer端做完后，将数据通过调用collectAsMap送入到driver端中，让driver进行接下来的运算。</p>
+</li>
+</ul>
+</li>
+<li><p>在进行reduceByKey操作时，reducer端有几个？和什么有关系？</p>
+<p>大概说一下我的理解：</p>
+<ol>
+<li><p>在mapreduce里，reducer的number是很重要的(显式指定？)。</p>
+</li>
+<li><p>而在spark中，在reducebykey时会发生shuffle，此时比较重要的是看子阶段rdd的partition个数(因为意味着数据会分在几个partition里面)。如果这个partition个数在reducebykey函数里面没有指定，则取决于partitioner中的partition个数。默认的实现是直接取spark.default.parallelism这个配置项的值作为分区数的，如果没有配置，则以RDD（即map的最后一个RDD）的分区数为准。</p>
+<p>所以在reducebykey的时候，是没有reducer端的，而是在各个partition端作sort，数据分散在该例子中的两个partition中。在此之后通过collectAsMap()将数据汇集在driver端，由driver进行之后的操作。</p>
+</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/31/SGX Batcher‘s sort/" rel="next" title="SGX Batcher's sort">
+                <i class="fa fa-chevron-left"></i> SGX Batcher's sort
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/12/Spark中SVM doc/" rel="prev" title="Spark中SVM doc">
+                Spark中SVM doc <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
+          <p class="site-author-name" itemprop="name">Zhou</p>
+           
+              <p class="site-description motion-element" itemprop="description">周的小站</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/archive/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#KMeans"><span class="nav-number">1.</span> <span class="nav-text">KMeans</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#例子代码"><span class="nav-number">1.1.</span> <span class="nav-text">例子代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过程分析"><span class="nav-number">1.2.</span> <span class="nav-text">过程分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spark中kmeans实现"><span class="nav-number">1.3.</span> <span class="nav-text">spark中kmeans实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ml-KMeans"><span class="nav-number">1.3.1.</span> <span class="nav-text">ml.KMeans</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mllib-KMeans"><span class="nav-number">1.3.2.</span> <span class="nav-text">mllib.KMeans</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一-rdd中point转换"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">一. rdd中point转换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二-初始化中心点"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">二. 初始化中心点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三-对模型进行收敛计算"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">三. 对模型进行收敛计算</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

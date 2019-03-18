@@ -115,8 +115,8 @@
 <meta property="og:image" content="http://chzhou.cc/images/SparkML电影推荐流程分析/j4stor.PNG">
 <meta property="og:image" content="http://chzhou.cc/images/SparkML电影推荐流程分析/j5s1.PNG">
 <meta property="og:image" content="http://chzhou.cc/images/SparkML电影推荐流程分析/j5s2.PNG">
-<meta property="og:image" content="http://chzhou.cc/j6s.PNG">
-<meta property="og:updated_time" content="2019-03-18T14:10:16.646Z">
+<meta property="og:image" content="http://chzhou.cc/images/SparkML电影推荐流程分析/j6s.PNG">
+<meta property="og:updated_time" content="2019-03-18T14:28:14.718Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SparkML电影推荐流程分析">
 <meta name="twitter:description" content="SparkML电影推荐流程分析之前采用spark-submit 进行分析，产出的信息太多，很难缕清关系，难以得到每步产生的数据和操作过程。所以采用spark-shell 以一行一行输入的方式交互进行程序运行，同时从Web-UI上产生的信息进行同步分析。以下为每步操作： 为了打字方便，以下 Web-UI统一拿 web 代替。  启动spark-shell 1chzhou@lotus02:/usr/s">
@@ -379,13 +379,8 @@
 <li><p>这里改写了原程序，原程序是直接进行了collect.toMap操作，这里分成两步，先cache存到内存中，再进行colletc.toMap操作</p>
 </li>
 <li><p>因为进行了collect操作，此时web显示了信息</p>
-<p><img src="/images/SparkML电影推荐流程分析/s0.PNG" alt="s0"></p>
+<p><img src="/images/SparkML电影推荐流程分析/s0.PNG" alt="s0"><br>为Stage0信息，进行了map操作。（绿色代表在内存中）</p>
 </li>
-</ul>
-</li>
-</ol>
-<pre><code>为Stage0信息，进行了map操作。（绿色代表在内存中）
-</code></pre><ul>
 <li><p>在web中stage/Aggregated Metrics by Executor选项中，可以看到</p>
 <p><img src="/images/SparkML电影推荐流程分析/s0 reco.PNG" alt="s0 reco"></p>
 <p>图片有些小。。。简单来说，就是movies.dat中总共有3883条record，这里08机器存了1951条record，09上存了3883-1951=1932条数据。在这里看出了数据的分布。从这个方面也显示了上图中map操作的时候从movies.dat[4]和movies.dat[5]中获得数据。（但是看不出来movies.dat[4]是08还是09上）</p>
@@ -394,7 +389,7 @@
 <p><img src="/images/SparkML电影推荐流程分析/s0 stor.PNG" alt="s0 stor"></p>
 </li>
 </ul>
-<ol start="6">
+</li>
 <li><p>对ratings进行统计计数，先是对numRatings计数</p>
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numRatings = ratings.count</span><br><span class="line">numRatings: <span class="type">Long</span> = <span class="number">1000209</span></span><br></pre></td></tr></table></figure>
 <ul>
@@ -430,7 +425,7 @@
 <li><p>第二个是count操作</p>
 <p><img src="/images/SparkML电影推荐流程分析/j2说.PNG" alt="j2说"></p>
 <p>（不懂为什么右上角是distinct，难道是在distinct里进行count操作，所以这么显示？？）</p>
-<p>在存储方面，08上是3020条record，09上是3021条record（加起来还是6041，为什么不是6040？？）</p>
+<p> (在存储方面，08上是3020条record，09上是3021条record（加起来还是6041，为什么不是6040？？）</p>
 </li>
 </ul>
 </li>
@@ -494,7 +489,7 @@
 <p>此时为Job6阶段，因为对test没有进行repartition操作，这里只有count操作。</p>
 <ul>
 <li><p>DAG图为</p>
-<p><img src="/j6s.PNG" alt="j6s"></p>
+<p><img src="/images/SparkML电影推荐流程分析/j6s.PNG" alt="j6s"></p>
 <p>在存储方面，08上有503331条record，09上有496878条record，一共503331+496878=1000209数据。（为什么与输出不一致？）</p>
 <p>另外，在web的storage界面，因为没有repartition操作，产生的rdd[30]为两个partition。</p>
 </li>
@@ -546,6 +541,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/05/Spark Q&A/" rel="prev" title="Spark Q&A">
+                Spark Q&A <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -620,7 +619,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -633,7 +632,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/archive/index.html">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">10</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

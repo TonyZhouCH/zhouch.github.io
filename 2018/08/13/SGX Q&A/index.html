@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="SGX,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="EPC是什么？物理位置在哪里？  EPC:Enclave Page Cache. The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of DRAM. (which is not on CPU and it">
+<meta name="keywords" content="SGX">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SGX Q&amp;A">
+<meta property="og:url" content="http://chzhou.cc/2018/08/13/SGX Q&A/index.html">
+<meta property="og:site_name" content="周的小站">
+<meta property="og:description" content="EPC是什么？物理位置在哪里？  EPC:Enclave Page Cache. The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of DRAM. (which is not on CPU and it">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://insujang.github.io/assets/images/170403/epc.png">
+<meta property="og:image" content="https://software.intel.com/sites/default/files/managed/6f/ab/runtime-execution.png">
+<meta property="og:updated_time" content="2019-03-18T14:21:07.161Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SGX Q&amp;A">
+<meta name="twitter:description" content="EPC是什么？物理位置在哪里？  EPC:Enclave Page Cache. The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of DRAM. (which is not on CPU and it">
+<meta name="twitter:image" content="https://insujang.github.io/assets/images/170403/epc.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://chzhou.cc/2018/08/13/SGX Q&A/">
+
+
+
+
+
+  <title>SGX Q&A | 周的小站</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">周的小站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-resume">
+          <a href="/resume/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            简历
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/08/13/SGX Q&A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SGX Q&A</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-13T21:14:43+08:00">
+                2018-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ol>
+<li><p>EPC是什么？物理位置在哪里？</p>
+<ul>
+<li>EPC:Enclave Page Cache.</li>
+<li>The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of <strong>DRAM</strong>. (which is not on CPU and it is <strong>MAIN MEMORY</strong>)</li>
+</ul>
+<p><img src="https://insujang.github.io/assets/images/170403/epc.png" alt="EPC and PRM layout"></p>
+<p>注：PRM:Processor Reserved Memory</p>
+<p>(<a href="https://insujang.github.io/2017-04-03/intel-sgx-protection-mechanism/" target="_blank" rel="noopener">参考链接</a>)</p>
+</li>
+<li><p>谁对EPC有读取权限？</p>
+<p>应用程序由可信部分和不可信部分构成。只有可信函数被调用，才能访问EPC。其他均被阻挡。<a href="https://software.intel.com/zh-cn/sgx/details" target="_blank" rel="noopener">参考链接</a></p>
+<p><img src="https://software.intel.com/sites/default/files/managed/6f/ab/runtime-execution.png" alt></p>
+</li>
+<li><p>现在的EPC是多大？</p>
+<ul>
+<li>因为EPC在内存中，而内存又被多个其他进程使用，为了不产生冲突，经过Intel分析后将大小设置为定值.<a href="https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/737218" target="_blank" rel="noopener">参考链接</a></li>
+<li>对于Win：如果OEM支持PRMRR选项（没有查到PRMRR准确定义，大概就是个选项），那么可将大小设置为32 MB, 64 MB or 128 MB。BIOS中默认大小为 128 MB.<a href="https://software.intel.com/en-us/articles/getting-started-with-sgx-sdk-for-windows" target="_blank" rel="noopener">参考链接-官网</a></li>
+<li>对于Linux：因为 Linux支持 paging 技术，而Win不支持。所以在Linux中可以突破Win的限制，在所参考的链接里大小最大达到了4G. <a href="https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/670322#comment-1878875" target="_blank" rel="noopener">参考链接-时间为16年到17年初</a></li>
+<li>在上一条的参考链接里，有条回答进行了总结：“The physical protected memory is limited to the PRMRR size set in BIOS and the max we support at this time is 128MB in Skylake. The reason why you are able to set the heapsize you set is because of the paging support in Linux driver and we don’t have this support in Windows at this time. Similar to how memory is managed in OS, enclave pages are managed similarly.”</li>
+</ul>
+</li>
+<li><p>数据送到EPC中是加密的还是未加密的？</p>
+<p>这个问题得到的资料比较混乱，现未有准确答案。只简单罗列搜索到的资料。</p>
+<ul>
+<li><p><a href="https://software.intel.com/zh-cn/sgx/details" target="_blank" rel="noopener">参考资料1</a></p>
+<p>对于enclave（中文为“围圈”），所有进程数据均以明文形式可见；外部访问围圈数据被拒绝</p>
+</li>
+<li><p><a href="https://software.intel.com/zh-cn/videos/how-to-seal-data-in-intel-sgx" target="_blank" rel="noopener">参考资料2-页面下面文字稿选项第四段</a></p>
+<p>该资料未明确提到在enclave中数据是不是加密的。但是提到将数据从enclave到不信任的内存中，需要进行sealing，即进行加密。所以从这个行为推测enclave是未加密的（否则如果是加密的话就不需要sealing了。不知道这样理解对不对）</p>
+</li>
+<li><p><a href="https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/722444" target="_blank" rel="noopener">参考资料3</a></p>
+<p>提问者从文档当中对数据是否加密产生了矛盾的结论。Intel的工程师回答”Data in EPC is encrypted and integrity protected “, 但之后又说”From the <strong>CPU standpoint</strong>, data in EPC is unencrypted, because the MEE sits transparently between the CPU and the PRM. In other words, the data in EPC is encrypted because it’s outside the CPU package. However, it doesn’t need to be this way. For instance, a CPU with special on-chip memory wouldn’t need the MEE and the EPC memory wouldn’t have to be encrypted.”</p>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>对于这个问题我还需要再查一查。
+</code></pre><ol start="5">
+<li><p>对于EPC的R/W ops，OS是可以看见的？</p>
+<p>（未找见相应资料。我推测如果操作是enclave与外界（memory）的话，肯定能被OS看见。在enclave内部的话，就看不见了）</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SGX/" rel="tag"># SGX</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/05/Spark Q&A/" rel="next" title="Spark Q&A">
+                <i class="fa fa-chevron-left"></i> Spark Q&A
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/21/Enclave文件结构/" rel="prev" title="Enclave文件结构">
+                Enclave文件结构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
+          <p class="site-author-name" itemprop="name">Zhou</p>
+           
+              <p class="site-description motion-element" itemprop="description">周的小站</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/archive/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

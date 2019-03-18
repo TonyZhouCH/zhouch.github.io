@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Spark,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？  Operations which can cause a shuffle include repartition operations like repartition and coalesce, ‘ByKey’ operations (except for count">
+<meta name="keywords" content="Spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark Q&amp;A">
+<meta property="og:url" content="http://chzhou.cc/2018/08/05/Spark Q&A/index.html">
+<meta property="og:site_name" content="周的小站">
+<meta property="og:description" content="Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？  Operations which can cause a shuffle include repartition operations like repartition and coalesce, ‘ByKey’ operations (except for count">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-18T14:22:22.532Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark Q&amp;A">
+<meta name="twitter:description" content="Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？  Operations which can cause a shuffle include repartition operations like repartition and coalesce, ‘ByKey’ operations (except for count">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://chzhou.cc/2018/08/05/Spark Q&A/">
+
+
+
+
+
+  <title>Spark Q&A | 周的小站</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">周的小站</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-resume">
+          <a href="/resume/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            简历
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/08/05/Spark Q&A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark Q&A</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-05T11:29:21+08:00">
+                2018-08-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ol>
+<li><p>Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？</p>
+<blockquote>
+<p>Operations which can cause a shuffle include <strong>repartition operations</strong> like repartition and coalesce, <strong>‘ByKey’ operations</strong> (except for counting) like groupByKey and reduceByKey, and <strong>join operations</strong> like cogroup and join <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#background" target="_blank" rel="noopener">RDD doc</a></p>
+</blockquote>
+<ul>
+<li>repartition operations: <code>repartition</code>, <code>coalesce</code></li>
+<li>‘ByKey’ operations: <code>groupByKey</code>, <code>reduceByKey</code>, <code>aggregateByKey</code>, <code>sortByKey</code>  (<code>countByKey</code> is an <em>Actions</em> operation, so it isn’t a <em>shuffle operation</em>)</li>
+<li>join operations: <code>cogroup</code>, <code>join</code></li>
+<li><p>Another operation which takes “numPartitions” as an argument is <code>distinct</code> operation</p>
+<p>RDD is stored in memory by default. There are  seven storage level. The full set of storage levels can be found <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence" target="_blank" rel="noopener">here</a>. <em>MEMORY_ONLY</em> is the default level, which means when data can’t fit in memory, <strong>some partitions will not be cached</strong> and will be <strong>recomputed</strong> on the fly each time they’re needed. In <em>MEMORY_AND_DISK</em> level, if the RDD does not fit in memory, store the partitions that don’t fit on disk, and read them from there when they’re needed. Also, shuffle generates a large number of intermediate files on disk, these files are preserved until the corresponding RDDs are no longer used and are garbage collected. This is done so the shuffle files don’t need to be re-created if the lineage is re-computed.</p>
+<p>（有个问题：刚开始的资料来自RDD doc，在这个shuffle类目<a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#performance-impact" target="_blank" rel="noopener">链接</a>的第三段最后一句，原文是说内存不够的话就会把tables存到disk中。这里说的只是针对’ByKey操作吗？（因为上文在说ByKey操作））</p>
+</li>
+</ul>
+</li>
+<li><p>Spark中所谓的lazy transformation触发条件有哪些？</p>
+<blockquote>
+<p>The transformations are only computed when an action requires a result to be returned to the driver program. <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-operations" target="_blank" rel="noopener">RDD doc</a></p>
+</blockquote>
+<p> <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#actions" target="_blank" rel="noopener">Actions操作</a></p>
+</li>
+<li><p>Spark core API</p>
+<p> Spark Core提供Spark最基础与最核心的功能，主要包括以下功能：</p>
+<ul>
+<li>SparkContext：通常而言，Driver Application的执行与输出都是通过SparkContext来完成的。在正式提交Application之前，首先需要初始化SparkContext。SparkContext隐藏了网络通信、分布式部署、消息通信、存储能力、计算能力、缓存、测量系统、文件服务、Web服务等内容，应用程序开发者只需要使用SparkContext提供的API完成功能开发。SparkContext内置的DAGScheduler负责创建Job，将DAG中的RDD划分到不同的Stage，提交Stage等功能。内置的TaskScheduler负责资源的申请，任务的提交及请求集群对任务的调度等工作。 </li>
+<li>存储体系：Spark优先考虑使用各节点的内存作为存储，当内存不足时才会考虑使用磁盘，这极大地减少了磁盘IO，提升了任务执行的效率，使得Spark适用于实时计算、流式计算等场景。此外，Spark还提供了以内存为中心的高容错的分布式文件系统Tachyon供用户进行选择。Tachyon能够为Spark提供可靠的内存级的文件共享服务。 </li>
+<li>计算引擎：计算引擎由SparkContext中的DAGScheduler、RDD以及具体节点上的Executor负责执行的Map和Reduce任务组成。DAGScheduler和RDD虽然位于SparkContext内部，但是在任务正式提交与执行之前会将Job中的RDD组织成有向无环图（DAG），并对Stage进行划分，决定了任务执行阶段任务的数量、迭代计算、shuffle等过程。 </li>
+<li>部署模式：由于单节点不足以提供足够的存储和计算能力，所以作为大数据处理的Spark在SparkContext的TaskScheduler组件中提供了对Standalone部署模式的实现和Yarn、Mesos等分布式资源管理系统的支持。通过使用Standalone、Yarn、Mesos等部署模式为Task分配计算资源，提高任务的并发执行效率。</li>
+</ul>
+</li>
+<li><p>Where is RDD’s lineage stored? And how to get it?</p>
+<blockquote>
+<p>The RDD‘s lineage is stored in memory, same as RDD. And the RDD lineage lives on the driver where RDDs live. <a href="https://stackoverflow.com/questions/34713793/where-spark-rdd-lineage-is-stored" target="_blank" rel="noopener">stackoverflow</a></p>
+</blockquote>
+<p> To get lineage:</p>
+<ol>
+<li><p>Using <code>toDebugString</code> method, one can get RDD lineage graph.  (<a href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-rdd-lineage.html#toDebugString" target="_blank" rel="noopener">参考</a>)</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> wordCount = sc.textFile(<span class="string">"README.md"</span>).flatMap(_.split(<span class="string">"\\s+"</span>)).map((_, <span class="number">1</span>)).reduceByKey(_ + _)</span><br><span class="line">wordCount: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">ShuffledRDD</span>[<span class="number">21</span>] at reduceByKey at &lt;console&gt;:<span class="number">24</span></span><br><span class="line"></span><br><span class="line">scala&gt; wordCount.toDebugString</span><br><span class="line">res13: <span class="type">String</span> =</span><br><span class="line">(<span class="number">2</span>) <span class="type">ShuffledRDD</span>[<span class="number">21</span>] at reduceByKey at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line"> +-(<span class="number">2</span>) <span class="type">MapPartitionsRDD</span>[<span class="number">20</span>] at map at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line">    |  <span class="type">MapPartitionsRDD</span>[<span class="number">19</span>] at flatMap at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line">    |  <span class="type">README</span>.md <span class="type">MapPartitionsRDD</span>[<span class="number">18</span>] at textFile at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line">    |  <span class="type">README</span>.md <span class="type">HadoopRDD</span>[<span class="number">17</span>] at textFile at &lt;console&gt;:<span class="number">24</span> []</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>In spark shell, with <em>spark.logLineage</em> property enabled , <code>toDebugString</code> is included when executing an action.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/spark-shell --conf spark.logLineage=true</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Using <code>spark-submit</code> </p>
+<p>This section is still in progress…( Because using <code>--conf spark.logLineage=true</code>, the console doesn`t print the graph.)</p>
+<p>And this is the <code>runjob</code> method’s souce code in SparkContext class.</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">runJob</span></span>[<span class="type">T</span>, <span class="type">U</span>: <span class="type">ClassTag</span>](</span><br><span class="line">      rdd: <span class="type">RDD</span>[<span class="type">T</span>],</span><br><span class="line">      func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[<span class="type">T</span>]) =&gt; <span class="type">U</span>,</span><br><span class="line">      partitions: <span class="type">Seq</span>[<span class="type">Int</span>],</span><br><span class="line">      resultHandler: (<span class="type">Int</span>, <span class="type">U</span>) =&gt; <span class="type">Unit</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="keyword">if</span> (stopped.get()) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">"SparkContext has been shutdown"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> callSite = getCallSite</span><br><span class="line">    <span class="keyword">val</span> cleanedFunc = clean(func)</span><br><span class="line">    logInfo(<span class="string">"Starting job: "</span> + callSite.shortForm)</span><br><span class="line">    <span class="keyword">if</span> (conf.getBoolean(<span class="string">"spark.logLineage"</span>, <span class="literal">false</span>)) &#123;</span><br><span class="line">      logInfo(<span class="string">"RDD's recursive dependencies:\n"</span> + rdd.toDebugString)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/02/SparkML电影推荐流程分析/" rel="next" title="SparkML电影推荐流程分析">
+                <i class="fa fa-chevron-left"></i> SparkML电影推荐流程分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/13/SGX Q&A/" rel="prev" title="SGX Q&A">
+                SGX Q&A <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
+          <p class="site-author-name" itemprop="name">Zhou</p>
+           
+              <p class="site-description motion-element" itemprop="description">周的小站</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/archive/index.html">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhou</span>
+
+  
+</div>
+
+
+  <div class="powered-by">
+    由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+  </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">
+    主题 &mdash;
+    <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+      NexT.Mist
+    </a>
+  </div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
