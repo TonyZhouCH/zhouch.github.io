@@ -269,6 +269,283 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/08/02/SparkML电影推荐流程分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/02/SparkML电影推荐流程分析/" itemprop="url">SparkML电影推荐流程分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-02T17:59:46+08:00">
+                2018-08-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="SparkML电影推荐流程分析"><a href="#SparkML电影推荐流程分析" class="headerlink" title="SparkML电影推荐流程分析"></a>SparkML电影推荐流程分析</h1><p>之前采用<code>spark-submit</code> 进行分析，产出的信息太多，很难缕清关系，难以得到每步产生的数据和操作过程。所以采用<code>spark-shell</code> 以一行一行输入的方式交互进行程序运行，同时从Web-UI上产生的信息进行同步分析。以下为每步操作：</p>
+<p>为了打字方便，以下 Web-UI统一拿 web 代替。</p>
+<ol>
+<li><p>启动<code>spark-shell</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chzhou@lotus02:/usr/spark/bin$ spark-shell --conf spark.logLineage=true --master spark://lotus02:7077 --deploy-mode client --jars file:///home/chzhou/mltr/machine-learning/target/scala-2.11/movielens-als_2.11-0.1.jar</span><br></pre></td></tr></table></figure>
+<ul>
+<li>操作的时候把程序用sbt打包的jar包导入，这样在shell里就可以调用原程序自定义的函数</li>
+<li>指定master和deploy-mode，以分布式运行</li>
+<li>使得<code>spark.logLineage</code> 为true，这样就能在控制台自动输出 RDD 的lineage</li>
+</ul>
+</li>
+<li><p>导入库</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.<span class="type">File</span></span><br><span class="line"><span class="keyword">import</span> scala.io.<span class="type">Source</span></span><br><span class="line"><span class="keyword">import</span> org.apache.log4j.<span class="type">Logger</span></span><br><span class="line"><span class="keyword">import</span> org.apache.log4j.<span class="type">Level</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span>._</span><br><span class="line"><span class="keyword">import</span> org.apache.spark.rdd._</span><br><span class="line"><span class="keyword">import</span> org.apache.spark.mllib.recommendation.&#123;<span class="type">ALS</span>, <span class="type">Rating</span>, <span class="type">MatrixFactorizationModel</span>&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>读取个人喜好的rating文件，并形成rdd</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> myRatings = <span class="type">MovieLensALS</span>.loadRatings(<span class="string">"/home/chzhou/ml-1m/personalRatings.txt"</span>)</span><br><span class="line">myRatings: <span class="type">Seq</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">Stream</span>(<span class="type">Rating</span>(<span class="number">0</span>,<span class="number">1</span>,<span class="number">2.0</span>), ?)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> myRatingsRDD = sc.parallelize(myRatings, <span class="number">1</span>).cache</span><br><span class="line">myRatingsRDD: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">0</span>] at parallelize at &lt;console&gt;:<span class="number">39</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>第二句用<code>cache</code>将其存入内存，这样Web-UI中的Storage选项之后就可以查到RDD信息</li>
+<li>此时Web-UI中还是全空的，没有任何信息，因为此时并没有Actions操作，并没有实际产生RDD</li>
+</ul>
+</li>
+<li><p>在spark-shell中以多行输入的方式读取rating.dat文件</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"> <span class="keyword">val</span> ratings = sc.textFile(<span class="string">"hdfs://lotus02:9000/ml/medium/ratings.dat"</span>).map &#123; line =&gt;</span><br><span class="line">      <span class="keyword">val</span> fields = line.split(<span class="string">"::"</span>)</span><br><span class="line">      <span class="comment">// format: (timestamp % 10, Rating(userId, movieId, rating))</span></span><br><span class="line">      (fields(<span class="number">3</span>).toLong % <span class="number">10</span>, <span class="type">Rating</span>(fields(<span class="number">0</span>).toInt, fields(<span class="number">1</span>).toInt, fields(<span class="number">2</span>).toDouble))</span><br><span class="line">    &#125;.cache</span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">ratings: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">Long</span>, org.apache.spark.mllib.recommendation.<span class="type">Rating</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">3</span>] at map at &lt;console&gt;:<span class="number">37</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在spark-shell中以多行输入的方式读取movies.dat文件</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"><span class="keyword">val</span> movies = sc.textFile(<span class="string">"hdfs://lotus02:9000/ml/medium/movies.dat"</span>).map &#123; line =&gt;</span><br><span class="line">      <span class="keyword">val</span> fields = line.split(<span class="string">"::"</span>)</span><br><span class="line">      <span class="comment">// format: (movieId, movieName)</span></span><br><span class="line">      (fields(<span class="number">0</span>).toInt, fields(<span class="number">1</span>))</span><br><span class="line">    &#125;.cache</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">movies: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">Int</span>, <span class="type">String</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">6</span>] at map at &lt;console&gt;:<span class="number">37</span></span><br><span class="line"></span><br><span class="line">scala&gt; movies.collect().toMap</span><br><span class="line">res0: scala.collection.immutable.<span class="type">Map</span>[<span class="type">Int</span>,<span class="type">String</span>] = <span class="type">Map</span>(<span class="number">2163</span> -&gt; <span class="type">Attack</span> of the <span class="type">Killer</span> <span class="type">Tomatoes</span>! (<span class="number">1980</span>), <span class="number">645</span> -&gt; <span class="type">Nelly</span> &amp; <span class="type">Monsieur</span> <span class="type">Arnaud</span> (<span class="number">1995</span>), <span class="number">892</span> -&gt; <span class="type">Twelfth</span> <span class="type">Night</span> (<span class="number">1996</span>), <span class="number">69</span> -&gt; <span class="type">Friday</span> (<span class="number">1995</span>), <span class="number">2199</span> -&gt; <span class="type">Phoenix</span> (<span class="number">1998</span>), <span class="number">3021</span> -&gt; <span class="type">Funhouse</span>, <span class="type">The</span> (<span class="number">1981</span>), <span class="number">1322</span> -&gt; <span class="type">Amityville</span> <span class="number">1992</span>: <span class="type">It</span><span class="symbol">'s</span> <span class="type">About</span> <span class="type">Time</span> (<span class="number">1992</span>), <span class="number">1665</span> -&gt; <span class="type">Bean</span> (<span class="number">1997</span>), <span class="number">1036</span> -&gt; <span class="type">Die</span> <span class="type">Hard</span> (<span class="number">1988</span>), <span class="number">2822</span> -&gt; <span class="type">Medicine</span> <span class="type">Man</span> (<span class="number">1992</span>), <span class="number">2630</span> -&gt; <span class="type">Besieged</span> (<span class="type">L</span>' <span class="type">Assedio</span>) (<span class="number">1998</span>), <span class="number">3873</span> -&gt; <span class="type">Cat</span> <span class="type">Ballou</span> (<span class="number">1965</span>), <span class="number">1586</span> -&gt; <span class="type">G</span>.<span class="type">I</span>. <span class="type">Jane</span> (<span class="number">1997</span>), <span class="number">1501</span> -&gt; <span class="type">Keys</span> to <span class="type">Tulsa</span> (<span class="number">1997</span>), <span class="number">2452</span> -&gt; <span class="type">Gate</span> <span class="type">II</span>: <span class="type">Trespassers</span>, <span class="type">The</span> (<span class="number">1990</span>), <span class="number">809</span> -&gt; <span class="type">Fled</span> (<span class="number">1996</span>), <span class="number">1879</span> -&gt; <span class="type">Hanging</span> <span class="type">Garden</span>, <span class="type">The</span> (<span class="number">1997</span>), <span class="number">1337</span> -&gt; <span class="type">Body</span> <span class="type">Snatcher</span>, <span class="type">The</span> (<span class="number">1945</span>), <span class="number">1718</span> -&gt; <span class="type">Stranger</span> in the <span class="type">House</span> (<span class="number">1997</span>), <span class="number">2094</span> -&gt; <span class="type">Rocketeer</span>, <span class="type">The</span> (<span class="number">1991</span>), <span class="number">3944</span> -&gt; <span class="type">Bootmen</span> (<span class="number">2000</span>), <span class="number">1411</span> -&gt; <span class="type">Hamlet</span> (<span class="number">1996</span>), <span class="number">629</span> -&gt; <span class="type">Rude</span> (<span class="number">1995</span>), <span class="number">3883</span> -&gt; <span class="type">Catfish</span> in <span class="type">Black</span> <span class="type">Bean</span> <span class="type">Sauce</span> (<span class="number">2.</span>.</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>这里改写了原程序，原程序是直接进行了collect.toMap操作，这里分成两步，先cache存到内存中，再进行colletc.toMap操作</p>
+</li>
+<li><p>因为进行了collect操作，此时web显示了信息</p>
+<p><img src="/images/SparkML电影推荐流程分析/s0.PNG" alt="s0"></p>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>为Stage0信息，进行了map操作。（绿色代表在内存中）
+</code></pre><ul>
+<li><p>在web中stage/Aggregated Metrics by Executor选项中，可以看到</p>
+<p><img src="/images/SparkML电影推荐流程分析/s0 reco.PNG" alt="s0 reco"></p>
+<p>图片有些小。。。简单来说，就是movies.dat中总共有3883条record，这里08机器存了1951条record，09上存了3883-1951=1932条数据。在这里看出了数据的分布。从这个方面也显示了上图中map操作的时候从movies.dat[4]和movies.dat[5]中获得数据。（但是看不出来movies.dat[4]是08还是09上）</p>
+</li>
+<li><p>附上storage界面信息</p>
+<p><img src="/images/SparkML电影推荐流程分析/s0 stor.PNG" alt="s0 stor"></p>
+</li>
+</ul>
+<ol start="6">
+<li><p>对ratings进行统计计数，先是对numRatings计数</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numRatings = ratings.count</span><br><span class="line">numRatings: <span class="type">Long</span> = <span class="number">1000209</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>输出ratings的数据总共有1000209条数据</p>
+</li>
+<li><p>从web上查看stage信息</p>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>![s1](/images/SparkML电影推荐流程分析/s1.PNG)
+
+显示cache的是MapPartitionsRDD[3]，这与在第4步中的控制台输出是一样的。
+</code></pre><ul>
+<li><p>查看slave存储</p>
+<p><img src="/images/SparkML电影推荐流程分析/s1 rec.PNG" alt="s1 rec"></p>
+<p>08上有503331条record，09上有1000209-503331=496878条数据</p>
+</li>
+<li><p>storage界面信息和上一步差不多，不截图显示了。</p>
+</li>
+</ul>
+<ol start="7">
+<li><p>接下来统计用户数</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numUsers = ratings.map(_._2.user).distinct.count</span><br><span class="line">numUsers: <span class="type">Long</span> = <span class="number">6040</span></span><br></pre></td></tr></table></figure>
+<p>这里的map语句不太懂（推测是对ratings的字段进行操作）。。。然后进行了distinct操作，找出unique的用户，然后count进行计数。这里得到有6040名用户</p>
+<p>这里为Job2，Job2里有两个stage，第一个是distinct操作，第二个是count操作。</p>
+<ul>
+<li><p>第一个是distinct操作</p>
+<p><img src="/images/SparkML电影推荐流程分析/j2s1.PNG" alt="j2s1"></p>
+<p>这里用了之前cache过的RDD[3]，然后进行map和distinct操作。</p>
+<p>对于存储，不截图了，都一样，其中08上有3092条record，09上有2949条record（3092+2949=6041条，和上面输出的6040不一样。。？？）</p>
+</li>
+<li><p>第二个是count操作</p>
+<p><img src="/images/SparkML电影推荐流程分析/j2说.PNG" alt="j2说"></p>
+<p>（不懂为什么右上角是distinct，难道是在distinct里进行count操作，所以这么显示？？）</p>
+<p>在存储方面，08上是3020条record，09上是3021条record（加起来还是6041，为什么不是6040？？）</p>
+</li>
+</ul>
+</li>
+<li><p>接下来进行numMovies统计</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numMovies = ratings.map(_._2.product).distinct.count</span><br><span class="line">numMovies: <span class="type">Long</span> = <span class="number">3706</span></span><br></pre></td></tr></table></figure>
+<p>统计出来numMovies是3706部。</p>
+<p>此时为Job3，和上一步一样，分为两个阶段，也是distinct和count操作。DAG图和上一步差不多。不截图了。在存储方面，distinct操作中08是3619条record，09上是3600条record。在count操作中08是3620条record，09是3599条数据。两个操作中的总数都是7219条record。</p>
+</li>
+<li><p>定义numPartions</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numPartitions = <span class="number">4</span></span><br><span class="line">numPartitions: <span class="type">Int</span> = <span class="number">4</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>之后几步都是从ratings对数据进行切分，产生ML中的数据集。第一个数据集是训练集</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"><span class="keyword">val</span> training = ratings.filter(x =&gt; x._1 &lt; <span class="number">6</span>)</span><br><span class="line">      .values</span><br><span class="line">      .union(myRatingsRDD)</span><br><span class="line">      .repartition(numPartitions)</span><br><span class="line">      .cache()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">training: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">21</span>] at repartition at &lt;console&gt;:<span class="number">45</span></span><br></pre></td></tr></table></figure>
+<p>此时web中并没有变化，因为没有Actions操作。但是用cache将其存在了内存中。并且注意到和myRatingsRDD进行了union操作，并进行了repartition。</p>
+</li>
+<li><p>产生验证集</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> validation = ratings.filter(x =&gt; x._1 &gt;= <span class="number">6</span> &amp;&amp; x._1 &lt; <span class="number">8</span>)</span><br><span class="line">      .values</span><br><span class="line">      .repartition(numPartitions)</span><br><span class="line">      .cache()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">validation: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">28</span>] at repartition at &lt;console&gt;:<span class="number">42</span></span><br></pre></td></tr></table></figure>
+<p>web中还没有变化。进行了repartition。</p>
+</li>
+<li><p>产生测试集</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> test = ratings.filter(x =&gt; x._1 &gt;= <span class="number">8</span>).values.cache()</span><br><span class="line">test: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">30</span>] at values at &lt;console&gt;:<span class="number">38</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>统计训练集大小</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numTraining = training.count()</span><br><span class="line">numTraining: <span class="type">Long</span> = <span class="number">602252</span></span><br></pre></td></tr></table></figure>
+<p>因为进行了count操作，此时web有repartition了信息。</p>
+<p>为Job4，分为两个阶段，第一个为repartition，第二个是count操作。</p>
+<ul>
+<li><p>第一个为repartition，DAG图为</p>
+<p><img src="/images/SparkML电影推荐流程分析/j4s1.PNG" alt="j4s1"></p>
+<p>这里因为是对ratings操作，ratingsRDD已经cache过，所以直接读取，进行filter操作，然后与myRatings进行union，然后进行repartition。</p>
+<p>存储方面，08上有303152条record，09上有299100条record，一共303152+299100=602252条record。</p>
+</li>
+<li><p>第二个是count操作，DAG图为</p>
+<p><img src="/images/SparkML电影推荐流程分析/j4s2.PNG" alt="j4s2"></p>
+<p>存储方面，08上有301126条record，09上有301126条record，一共301126+301126=602252条。</p>
+</li>
+<li><p>在web上的storage界面，显示Partitions已经为4：</p>
+<p><img src="/images/SparkML电影推荐流程分析/j4stor.PNG" alt="j4stor"></p>
+<p>前几个的RDD除了第一个rdd是一个partition，其他都是两个partition。RDD doc中关于partition是这样说的：“Normally, Spark tries to set the number of partitions automatically based on your cluster”。前几个都是spark自动生成的partition。</p>
+</li>
+</ul>
+</li>
+<li><p>统计验证集大小</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numValidation = validation.count()</span><br><span class="line">numValidation: <span class="type">Long</span> = <span class="number">198919</span></span><br></pre></td></tr></table></figure>
+<p>此时为Job5，与上一步一样，同样分为repartition和count操作。</p>
+<ul>
+<li><p>repartition操作DAG图为</p>
+<p><img src="/images/SparkML电影推荐流程分析/j5s1.PNG" alt="j5s1"></p>
+<p>因为没有上一步的union操作，所以这里直接从以前cache过的RDD[3]进行filter，repartition操作。存储方面，08上有100299条数据，09上有98620条数据，一共100299+98620=198919条数据。</p>
+</li>
+<li><p>count操作</p>
+<p><img src="/images/SparkML电影推荐流程分析/j5s2.PNG" alt="j5s2"></p>
+<p>数据方面，08上有99459条数据，09上有99460条数据，一共99459+99460=198919条数据。</p>
+</li>
+<li><p>在web上的storage界面，partitions同样为4。（未截图）</p>
+</li>
+</ul>
+</li>
+<li><p>统计测试集数据大小。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numTest = test.count()</span><br><span class="line">numTest: <span class="type">Long</span> = <span class="number">199049</span></span><br></pre></td></tr></table></figure>
+<p>此时为Job6阶段，因为对test没有进行repartition操作，这里只有count操作。</p>
+<ul>
+<li><p>DAG图为</p>
+<p><img src="/j6s.PNG" alt="j6s"></p>
+<p>在存储方面，08上有503331条record，09上有496878条record，一共503331+496878=1000209数据。（为什么与输出不一致？）</p>
+<p>另外，在web的storage界面，因为没有repartition操作，产生的rdd[30]为两个partition。</p>
+</li>
+</ul>
+</li>
+<li><p>接下来是准备训练的一些参数</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> ranks = <span class="type">List</span>(<span class="number">8</span>, <span class="number">12</span>)</span><br><span class="line">ranks: <span class="type">List</span>[<span class="type">Int</span>] = <span class="type">List</span>(<span class="number">8</span>, <span class="number">12</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> lambdas = <span class="type">List</span>(<span class="number">0.1</span>, <span class="number">10.0</span>)</span><br><span class="line">lambdas: <span class="type">List</span>[<span class="type">Double</span>] = <span class="type">List</span>(<span class="number">0.1</span>, <span class="number">10.0</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> numIters = <span class="type">List</span>(<span class="number">10</span>, <span class="number">20</span>)</span><br><span class="line">numIters: <span class="type">List</span>[<span class="type">Int</span>] = <span class="type">List</span>(<span class="number">10</span>, <span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestModel: <span class="type">Option</span>[<span class="type">MatrixFactorizationModel</span>] = <span class="type">None</span></span><br><span class="line">bestModel: <span class="type">Option</span>[org.apache.spark.mllib.recommendation.<span class="type">MatrixFactorizationModel</span>] = <span class="type">None</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestValidationRmse = <span class="type">Double</span>.<span class="type">MaxValue</span></span><br><span class="line">bestValidationRmse: <span class="type">Double</span> = <span class="number">1.7976931348623157E308</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestRank = <span class="number">0</span></span><br><span class="line">bestRank: <span class="type">Int</span> = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestLambda = <span class="number">-1.0</span></span><br><span class="line">bestLambda: <span class="type">Double</span> = <span class="number">-1.0</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestNumIter = <span class="number">-1</span></span><br><span class="line">bestNumIter: <span class="type">Int</span> = <span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<p>此时没有rdd产生，web上没有变化。</p>
+</li>
+<li><p>此时进行了模型训练，调用ML库中的ALS（交替最小二乘 alternating least squares）。此时产生了很多的操作，且数据不清晰，有大量的矩阵操作） </p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/06/04/creation-code-input-data-solc编译出来的code，这三种code有什么区别/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1382,7 +1659,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1395,7 +1672,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/archive/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
