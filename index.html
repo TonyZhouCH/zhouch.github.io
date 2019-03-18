@@ -269,7 +269,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2019/03/18/华录杯项目说明/">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2019/01/01/tvm_sgx_doc/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Zhou">
@@ -288,7 +288,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/03/18/华录杯项目说明/" itemprop="url">未命名</a></h1>
+                <a class="post-title-link" href="/2019/01/01/tvm_sgx_doc/" itemprop="url">TVM_SGX</a></h1>
         
 
         <div class="post-meta">
@@ -300,8 +300,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-18T23:19:37+08:00">
-                2019-03-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-01T22:19:26+08:00">
+                2019-01-01
               </time>
             
 
@@ -340,8 +340,164 @@
       
         
           
-            <p>title: 华录杯比赛文档<br>date: 2018-10-21 16:20:33<br>tags: [hualu]</p>
-<h1 id="项目说明"><a href="#项目说明" class="headerlink" title="项目说明"></a>项目说明</h1><p>本次的赛题名称为“汉字档案手写识别大赛“，是“中国华录杯·开放数据创新应用大赛”复赛。最后我们队伍的成绩以编辑距离为评判准则，分数为0.18151，排名第二。</p>
+            <h1 id="TVM-SGX"><a href="#TVM-SGX" class="headerlink" title="TVM_SGX"></a>TVM_SGX</h1><blockquote>
+<p>文档分为两部分，第一部分为TVM自身及SGX属性的编译，第二部分为SGX APP的编译</p>
+</blockquote>
+<h2 id="TVM-编译"><a href="#TVM-编译" class="headerlink" title="TVM 编译"></a>TVM 编译</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /mnt</span><br><span class="line">mkdir build &amp;&amp; cd build</span><br><span class="line">cmake .. -DUSE_LLVM=ON -DUSE_SGX=/opt/sgxsdk -DRUST_SGX_SDK=/opt/rust-sgx-sdk</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
+<p>根据<a href="https://github.com/dmlc/tvm/tree/master/apps/sgx" target="_blank" rel="noopener">文档</a>，在启动好Docker后，进行编译。这里的编译是先由<code>CMakeLists.txt</code>生成<code>Makefile</code>，再进行编译。</p>
+<ul>
+<li><p>CMakeLists.txt</p>
+<p>在TVM主目录下（即/mnt)下，有总的CMakeLists.txt，其中关键语句为：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tvm_option(USE_SGX <span class="string">"Build with SGX"</span> <span class="keyword">OFF</span>)</span><br></pre></td></tr></table></figure>
+<p>在这里开启TVM编译时的SGX选项。</p>
+</li>
+<li><p>在 /mnt/cmake/modules/SGX.cmake里，对SGX的部分进行编译</p>
+<p>其中关键语句是在这里，使用SGX SDK里面的sgx_edger8r对<code>tvm.edl</code>进行解析，生成<code>tvm_t.c/h</code>和<code>tvm_u.c/h</code> </p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">add_custom_command</span>(</span><br><span class="line">    OUTPUT <span class="variable">$&#123;_tvm_u_h&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> <span class="variable">$&#123;USE_SGX&#125;</span>/bin/x64/sgx_edger8r --untrusted</span><br><span class="line">      --untrusted --untrusted-dir <span class="variable">$&#123;_sgx_src&#125;</span>/untrusted</span><br><span class="line">      --trusted --trusted-dir <span class="variable">$&#123;_sgx_src&#125;</span>/trusted</span><br><span class="line">      --search-path <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span> --search-path <span class="variable">$&#123;RUST_SGX_SDK&#125;</span>/edl</span><br><span class="line">      <span class="variable">$&#123;_tvm_edl&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> sed -i <span class="string">"4i '#include &lt;tvm/runtime/c_runtime_api.h&gt;'"</span> <span class="variable">$&#123;_tvm_u_h&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> sed -i <span class="string">"4i '#include &lt;tvm/runtime/c_runtime_api.h&gt;'"</span> <span class="variable">$&#123;_tvm_t_h&#125;</span></span><br><span class="line">    DEPENDS <span class="variable">$&#123;_tvm_edl&#125;</span></span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>TVM本身带有的SGX的代码在 /mnt/src/runtime/sgx/下。在此不详述</p>
+</li>
+</ul>
+<h2 id="SGX-APP编译"><a href="#SGX-APP编译" class="headerlink" title="SGX APP编译"></a>SGX APP编译</h2><p>总的来说，SGX APP的编译分为两部分，一部分为tvm model的编译，另一部分则是enclave的编译。其中该部分的目录在 /mnt/apps/sgx</p>
+<ul>
+<li><p>首先安装依赖库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install -e python -e topi/python -e nnvm/python</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>外部程序调用enclave的时候都是引用的<code>enclave.signed.so</code>，所以在看Makefile的时候主要盯着<code>enclave.signed.so</code>的产生流程。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">graph TB</span><br><span class="line"> subgraph TVM_model Part</span><br><span class="line"> J(build_model.py)--&gt;I </span><br><span class="line"> I(model.bc)--&gt;H </span><br><span class="line"> H(model.o)--&gt;F</span><br><span class="line"> end</span><br><span class="line"> subgraph SGX Part</span><br><span class="line"> G(xargo build --target x86_64-unknown-linux-sgx)</span><br><span class="line"> end</span><br><span class="line"> G(xargo build --target x86_64-unknown-linux-sgx)--&gt;|使用./src/lib.rs|E</span><br><span class="line"></span><br><span class="line"> F(libmodel.a)--&gt;E </span><br><span class="line"> E(libmodel_enclave.a)--&gt;|复制为|C </span><br><span class="line"> D(libtvm_t.a)--&gt;B </span><br><span class="line"> C(libenclave.a)--&gt;B </span><br><span class="line"> B(enclave.so)--&gt;|signing|A[enclave.signed.so]</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><code>libtvm_t.a</code>哪里来的？</p>
+<p>经过实验（注释掉以下代码则不会产生<code>libtvm_t.a</code>)，是在 /mnt/cmake/modules/SGX.cmake 里产生的，代码为：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#build trusted library</span></span><br><span class="line"><span class="keyword">set_source_files_properties</span>(<span class="variable">$&#123;_tvm_t_c&#125;</span> PROPERTIES GENERATED <span class="keyword">TRUE</span>)</span><br><span class="line"><span class="keyword">add_library</span>(tvm_t STATIC <span class="variable">$&#123;_tvm_t_c&#125;</span>)</span><br><span class="line"><span class="keyword">add_dependencies</span>(tvm_t sgx_edl)</span><br><span class="line"><span class="keyword">target_include_directories</span>(tvm_t PUBLIC <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span> <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span>/tlibc)</span><br></pre></td></tr></table></figure>
+<p>在根目录下的CMakeLists.txt引用该库为：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">NOT</span> USE_SGX <span class="keyword">STREQUAL</span> <span class="string">"OFF"</span>)</span><br><span class="line">  <span class="keyword">add_dependencies</span>(tvm sgx_edl)</span><br><span class="line">  <span class="keyword">add_dependencies</span>(tvm_runtime sgx_edl tvm_t)</span><br><span class="line">  <span class="keyword">install</span>(TARGETS tvm_t ARCHIVE DESTINATION lib<span class="variable">$&#123;LIB_SUFFIX&#125;</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br></pre></td></tr></table></figure>
+<p>同时，对<code>libtvm_t.a</code>使用<code>objdump</code>命令，输出为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> objdump -f libtvm_t.a:</span><br><span class="line"></span><br><span class="line">In archive libtvm_t.a:</span><br><span class="line"></span><br><span class="line">tvm_t.c.o:     file format elf64-x86-64</span><br><span class="line">architecture: i386:x86-64, flags 0x00000011:</span><br><span class="line">HAS_RELOC, HAS_SYMS</span><br><span class="line">start address 0x0000000000000000</span><br></pre></td></tr></table></figure>
+<p>可从中具体得知archive的是tvm_t.c.o</p>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2018/10/21/华录杯项目说明/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhou">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="周的小站">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/21/华录杯项目说明/" itemprop="url">华录杯比赛文档</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-21T16:20:33+08:00">
+                2018-10-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="项目说明"><a href="#项目说明" class="headerlink" title="项目说明"></a>项目说明</h1><p>本次的赛题名称为“汉字档案手写识别大赛“，是“中国华录杯·开放数据创新应用大赛”复赛。最后我们队伍的成绩以编辑距离为评判准则，分数为0.18151，排名第二。</p>
 <p>文档分为三个部分，分别为”配准“，”识别“，”匹配“三个内容。</p>
 <h2 id="比赛任务"><a href="#比赛任务" class="headerlink" title="比赛任务"></a>比赛任务</h2><p>本次任务中，参赛队伍将获得某公司人力部门所提供的近1000份应聘人员登记表格扫描图片，其中包含应聘人员的性别、民族、生日和教育经历等基本信息（姓名联系方式亲属等个人身份敏感信息已进行严格脱敏处理），还包括应聘者的个人学术或生活中所获荣誉与工作技能。参赛者需要利用得到的近1000张扫描件进行模型构建，从每个pdf文件中监测到表格，并从表格中提取指定类别的内容，准确地识别更多的类似档案扫描文件。</p>
 <p>本次比赛没有提供训练集，选手需自行寻找手写体数据，以完成模型的训练。测试集数据为脱敏后的《应聘登记表》，共有990张图片，是脱敏后的“应聘登记表”的扫描文件。每一份应聘登记表都包括应聘者性别、民族、生日、教育经历等基本信息，以及工作技能等求职相关信息。所有图片被分为2组，分别是为线上测试集和线下测试集。线上测试集共398张图片，可供参赛者下载，用于计算线上排名和调整模型；线下测试集，共592张（不提供下载），用于线下审核检查。</p>
@@ -486,163 +642,6 @@
 </ol>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>我们提交的文件中包含了所有文件。具体的执行流程可以参见batch.sh中的语句。也可以直接运行。</p>
 <p>由于整个项目代码由各个队友按照任务分别完成，在整合到一起后未经过长时间的测试，所以在代码衔接部分有可能出现问题。此类状况出现时烦请联系我们，我们会及时进行反馈。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://chzhou.cc/2019/01/01/tvm_sgx_doc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zhou">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/01/01/tvm_sgx_doc/" itemprop="url">TVM_SGX</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-01T22:19:26+08:00">
-                2019-01-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="TVM-SGX"><a href="#TVM-SGX" class="headerlink" title="TVM_SGX"></a>TVM_SGX</h1><blockquote>
-<p>文档分为两部分，第一部分为TVM自身及SGX属性的编译，第二部分为SGX APP的编译</p>
-</blockquote>
-<h2 id="TVM-编译"><a href="#TVM-编译" class="headerlink" title="TVM 编译"></a>TVM 编译</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /mnt</span><br><span class="line">mkdir build &amp;&amp; cd build</span><br><span class="line">cmake .. -DUSE_LLVM=ON -DUSE_SGX=/opt/sgxsdk -DRUST_SGX_SDK=/opt/rust-sgx-sdk</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
-<p>根据<a href="https://github.com/dmlc/tvm/tree/master/apps/sgx" target="_blank" rel="noopener">文档</a>，在启动好Docker后，进行编译。这里的编译是先由<code>CMakeLists.txt</code>生成<code>Makefile</code>，再进行编译。</p>
-<ul>
-<li><p>CMakeLists.txt</p>
-<p>在TVM主目录下（即/mnt)下，有总的CMakeLists.txt，其中关键语句为：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tvm_option(USE_SGX <span class="string">"Build with SGX"</span> <span class="keyword">OFF</span>)</span><br></pre></td></tr></table></figure>
-<p>在这里开启TVM编译时的SGX选项。</p>
-</li>
-<li><p>在 /mnt/cmake/modules/SGX.cmake里，对SGX的部分进行编译</p>
-<p>其中关键语句是在这里，使用SGX SDK里面的sgx_edger8r对<code>tvm.edl</code>进行解析，生成<code>tvm_t.c/h</code>和<code>tvm_u.c/h</code> </p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">add_custom_command</span>(</span><br><span class="line">    OUTPUT <span class="variable">$&#123;_tvm_u_h&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> <span class="variable">$&#123;USE_SGX&#125;</span>/bin/x64/sgx_edger8r --untrusted</span><br><span class="line">      --untrusted --untrusted-dir <span class="variable">$&#123;_sgx_src&#125;</span>/untrusted</span><br><span class="line">      --trusted --trusted-dir <span class="variable">$&#123;_sgx_src&#125;</span>/trusted</span><br><span class="line">      --search-path <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span> --search-path <span class="variable">$&#123;RUST_SGX_SDK&#125;</span>/edl</span><br><span class="line">      <span class="variable">$&#123;_tvm_edl&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> sed -i <span class="string">"4i '#include &lt;tvm/runtime/c_runtime_api.h&gt;'"</span> <span class="variable">$&#123;_tvm_u_h&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> sed -i <span class="string">"4i '#include &lt;tvm/runtime/c_runtime_api.h&gt;'"</span> <span class="variable">$&#123;_tvm_t_h&#125;</span></span><br><span class="line">    DEPENDS <span class="variable">$&#123;_tvm_edl&#125;</span></span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>TVM本身带有的SGX的代码在 /mnt/src/runtime/sgx/下。在此不详述</p>
-</li>
-</ul>
-<h2 id="SGX-APP编译"><a href="#SGX-APP编译" class="headerlink" title="SGX APP编译"></a>SGX APP编译</h2><p>总的来说，SGX APP的编译分为两部分，一部分为tvm model的编译，另一部分则是enclave的编译。其中该部分的目录在 /mnt/apps/sgx</p>
-<ul>
-<li><p>首先安装依赖库</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install -e python -e topi/python -e nnvm/python</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>外部程序调用enclave的时候都是引用的<code>enclave.signed.so</code>，所以在看Makefile的时候主要盯着<code>enclave.signed.so</code>的产生流程。</p>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">graph TB</span><br><span class="line"> subgraph TVM_model Part</span><br><span class="line"> J(build_model.py)--&gt;I </span><br><span class="line"> I(model.bc)--&gt;H </span><br><span class="line"> H(model.o)--&gt;F</span><br><span class="line"> end</span><br><span class="line"> subgraph SGX Part</span><br><span class="line"> G(xargo build --target x86_64-unknown-linux-sgx)</span><br><span class="line"> end</span><br><span class="line"> G(xargo build --target x86_64-unknown-linux-sgx)--&gt;|使用./src/lib.rs|E</span><br><span class="line"></span><br><span class="line"> F(libmodel.a)--&gt;E </span><br><span class="line"> E(libmodel_enclave.a)--&gt;|复制为|C </span><br><span class="line"> D(libtvm_t.a)--&gt;B </span><br><span class="line"> C(libenclave.a)--&gt;B </span><br><span class="line"> B(enclave.so)--&gt;|signing|A[enclave.signed.so]</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p><code>libtvm_t.a</code>哪里来的？</p>
-<p>经过实验（注释掉以下代码则不会产生<code>libtvm_t.a</code>)，是在 /mnt/cmake/modules/SGX.cmake 里产生的，代码为：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#build trusted library</span></span><br><span class="line"><span class="keyword">set_source_files_properties</span>(<span class="variable">$&#123;_tvm_t_c&#125;</span> PROPERTIES GENERATED <span class="keyword">TRUE</span>)</span><br><span class="line"><span class="keyword">add_library</span>(tvm_t STATIC <span class="variable">$&#123;_tvm_t_c&#125;</span>)</span><br><span class="line"><span class="keyword">add_dependencies</span>(tvm_t sgx_edl)</span><br><span class="line"><span class="keyword">target_include_directories</span>(tvm_t PUBLIC <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span> <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span>/tlibc)</span><br></pre></td></tr></table></figure>
-<p>在根目录下的CMakeLists.txt引用该库为：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">NOT</span> USE_SGX <span class="keyword">STREQUAL</span> <span class="string">"OFF"</span>)</span><br><span class="line">  <span class="keyword">add_dependencies</span>(tvm sgx_edl)</span><br><span class="line">  <span class="keyword">add_dependencies</span>(tvm_runtime sgx_edl tvm_t)</span><br><span class="line">  <span class="keyword">install</span>(TARGETS tvm_t ARCHIVE DESTINATION lib<span class="variable">$&#123;LIB_SUFFIX&#125;</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br></pre></td></tr></table></figure>
-<p>同时，对<code>libtvm_t.a</code>使用<code>objdump</code>命令，输出为：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> objdump -f libtvm_t.a:</span><br><span class="line"></span><br><span class="line">In archive libtvm_t.a:</span><br><span class="line"></span><br><span class="line">tvm_t.c.o:     file format elf64-x86-64</span><br><span class="line">architecture: i386:x86-64, flags 0x00000011:</span><br><span class="line">HAS_RELOC, HAS_SYMS</span><br><span class="line">start address 0x0000000000000000</span><br></pre></td></tr></table></figure>
-<p>可从中具体得知archive的是tvm_t.c.o</p>
-</li>
-</ul>
 
           
         
@@ -2193,7 +2192,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/archive/index.html">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
