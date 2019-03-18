@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -84,7 +84,7 @@
 
 
 
-  <link rel="alternate" href="/atom.xml" title="周的小站" type="application/atom+xml">
+  <link rel="alternate" href="/atom.xml" title="Zhou's Blog" type="application/atom+xml">
 
 
 
@@ -96,16 +96,16 @@
 
 
 
-<meta name="description" content="周的小站">
+<meta name="description" content="Zhou&apos;s Blog">
 <meta property="og:type" content="website">
-<meta property="og:title" content="周的小站">
+<meta property="og:title" content="Zhou&#39;s Blog">
 <meta property="og:url" content="http://chzhou.cc/index.html">
-<meta property="og:site_name" content="周的小站">
-<meta property="og:description" content="周的小站">
+<meta property="og:site_name" content="Zhou&#39;s Blog">
+<meta property="og:description" content="Zhou&apos;s Blog">
 <meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="周的小站">
-<meta name="twitter:description" content="周的小站">
+<meta name="twitter:title" content="Zhou&#39;s Blog">
+<meta name="twitter:description" content="Zhou&apos;s Blog">
 
 
 
@@ -113,7 +113,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Mist',
+    scheme: 'Muse',
     sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: true,
     tabs: true,
@@ -140,7 +140,7 @@
 
 
 
-  <title>周的小站</title>
+  <title>Zhou's Blog</title>
   
 
 
@@ -172,7 +172,7 @@
     <div class="custom-logo-site-title">
       <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">周的小站</span>
+        <span class="site-title">Zhou's Blog</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -278,7 +278,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -340,46 +340,19 @@
       
         
           
-            <h1 id="TVM-SGX"><a href="#TVM-SGX" class="headerlink" title="TVM_SGX"></a>TVM_SGX</h1><blockquote>
-<p>文档分为两部分，第一部分为TVM自身及SGX属性的编译，第二部分为SGX APP的编译</p>
-</blockquote>
-<h2 id="TVM-编译"><a href="#TVM-编译" class="headerlink" title="TVM 编译"></a>TVM 编译</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /mnt</span><br><span class="line">mkdir build &amp;&amp; cd build</span><br><span class="line">cmake .. -DUSE_LLVM=ON -DUSE_SGX=/opt/sgxsdk -DRUST_SGX_SDK=/opt/rust-sgx-sdk</span><br><span class="line">make -j4</span><br></pre></td></tr></table></figure>
-<p>根据<a href="https://github.com/dmlc/tvm/tree/master/apps/sgx" target="_blank" rel="noopener">文档</a>，在启动好Docker后，进行编译。这里的编译是先由<code>CMakeLists.txt</code>生成<code>Makefile</code>，再进行编译。</p>
-<ul>
-<li><p>CMakeLists.txt</p>
-<p>在TVM主目录下（即/mnt)下，有总的CMakeLists.txt，其中关键语句为：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tvm_option(USE_SGX <span class="string">"Build with SGX"</span> <span class="keyword">OFF</span>)</span><br></pre></td></tr></table></figure>
-<p>在这里开启TVM编译时的SGX选项。</p>
-</li>
-<li><p>在 /mnt/cmake/modules/SGX.cmake里，对SGX的部分进行编译</p>
-<p>其中关键语句是在这里，使用SGX SDK里面的sgx_edger8r对<code>tvm.edl</code>进行解析，生成<code>tvm_t.c/h</code>和<code>tvm_u.c/h</code> </p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">add_custom_command</span>(</span><br><span class="line">    OUTPUT <span class="variable">$&#123;_tvm_u_h&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> <span class="variable">$&#123;USE_SGX&#125;</span>/bin/x64/sgx_edger8r --untrusted</span><br><span class="line">      --untrusted --untrusted-dir <span class="variable">$&#123;_sgx_src&#125;</span>/untrusted</span><br><span class="line">      --trusted --trusted-dir <span class="variable">$&#123;_sgx_src&#125;</span>/trusted</span><br><span class="line">      --search-path <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span> --search-path <span class="variable">$&#123;RUST_SGX_SDK&#125;</span>/edl</span><br><span class="line">      <span class="variable">$&#123;_tvm_edl&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> sed -i <span class="string">"4i '#include &lt;tvm/runtime/c_runtime_api.h&gt;'"</span> <span class="variable">$&#123;_tvm_u_h&#125;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> sed -i <span class="string">"4i '#include &lt;tvm/runtime/c_runtime_api.h&gt;'"</span> <span class="variable">$&#123;_tvm_t_h&#125;</span></span><br><span class="line">    DEPENDS <span class="variable">$&#123;_tvm_edl&#125;</span></span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>TVM本身带有的SGX的代码在 /mnt/src/runtime/sgx/下。在此不详述</p>
-</li>
-</ul>
-<h2 id="SGX-APP编译"><a href="#SGX-APP编译" class="headerlink" title="SGX APP编译"></a>SGX APP编译</h2><p>总的来说，SGX APP的编译分为两部分，一部分为tvm model的编译，另一部分则是enclave的编译。其中该部分的目录在 /mnt/apps/sgx</p>
-<ul>
-<li><p>首先安装依赖库</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install -e python -e topi/python -e nnvm/python</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>外部程序调用enclave的时候都是引用的<code>enclave.signed.so</code>，所以在看Makefile的时候主要盯着<code>enclave.signed.so</code>的产生流程。</p>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">graph TB</span><br><span class="line"> subgraph TVM_model Part</span><br><span class="line"> J(build_model.py)--&gt;I </span><br><span class="line"> I(model.bc)--&gt;H </span><br><span class="line"> H(model.o)--&gt;F</span><br><span class="line"> end</span><br><span class="line"> subgraph SGX Part</span><br><span class="line"> G(xargo build --target x86_64-unknown-linux-sgx)</span><br><span class="line"> end</span><br><span class="line"> G(xargo build --target x86_64-unknown-linux-sgx)--&gt;|使用./src/lib.rs|E</span><br><span class="line"></span><br><span class="line"> F(libmodel.a)--&gt;E </span><br><span class="line"> E(libmodel_enclave.a)--&gt;|复制为|C </span><br><span class="line"> D(libtvm_t.a)--&gt;B </span><br><span class="line"> C(libenclave.a)--&gt;B </span><br><span class="line"> B(enclave.so)--&gt;|signing|A[enclave.signed.so]</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p><code>libtvm_t.a</code>哪里来的？</p>
-<p>经过实验（注释掉以下代码则不会产生<code>libtvm_t.a</code>)，是在 /mnt/cmake/modules/SGX.cmake 里产生的，代码为：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#build trusted library</span></span><br><span class="line"><span class="keyword">set_source_files_properties</span>(<span class="variable">$&#123;_tvm_t_c&#125;</span> PROPERTIES GENERATED <span class="keyword">TRUE</span>)</span><br><span class="line"><span class="keyword">add_library</span>(tvm_t STATIC <span class="variable">$&#123;_tvm_t_c&#125;</span>)</span><br><span class="line"><span class="keyword">add_dependencies</span>(tvm_t sgx_edl)</span><br><span class="line"><span class="keyword">target_include_directories</span>(tvm_t PUBLIC <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span> <span class="variable">$&#123;USE_SGX&#125;</span>/<span class="keyword">include</span>/tlibc)</span><br></pre></td></tr></table></figure>
-<p>在根目录下的CMakeLists.txt引用该库为：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">NOT</span> USE_SGX <span class="keyword">STREQUAL</span> <span class="string">"OFF"</span>)</span><br><span class="line">  <span class="keyword">add_dependencies</span>(tvm sgx_edl)</span><br><span class="line">  <span class="keyword">add_dependencies</span>(tvm_runtime sgx_edl tvm_t)</span><br><span class="line">  <span class="keyword">install</span>(TARGETS tvm_t ARCHIVE DESTINATION lib<span class="variable">$&#123;LIB_SUFFIX&#125;</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br></pre></td></tr></table></figure>
-<p>同时，对<code>libtvm_t.a</code>使用<code>objdump</code>命令，输出为：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> objdump -f libtvm_t.a:</span><br><span class="line"></span><br><span class="line">In archive libtvm_t.a:</span><br><span class="line"></span><br><span class="line">tvm_t.c.o:     file format elf64-x86-64</span><br><span class="line">architecture: i386:x86-64, flags 0x00000011:</span><br><span class="line">HAS_RELOC, HAS_SYMS</span><br><span class="line">start address 0x0000000000000000</span><br></pre></td></tr></table></figure>
-<p>可从中具体得知archive的是tvm_t.c.o</p>
-</li>
-</ul>
+          TVM_SGX
+文档分为两部分，第一部分为TVM自身及SGX属性的编译，第二部分为SGX APP的编译
 
-          
+TVM 编译1234cd /mntmkdir build &amp;&amp; cd buildcmake .. -DUSE_LLVM=ON -DUSE_SGX=/opt/sgxsdk -DRUST_SGX_SDK=/opt/rust-sgx-sdkmake -j4
+根据文档，在启动好Dock
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/01/01/tvm_sgx_doc/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -435,7 +408,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -497,153 +470,17 @@
       
         
           
-            <h1 id="项目说明"><a href="#项目说明" class="headerlink" title="项目说明"></a>项目说明</h1><p>本次的赛题名称为“汉字档案手写识别大赛“，是“中国华录杯·开放数据创新应用大赛”复赛。最后我们队伍的成绩以编辑距离为评判准则，分数为0.18151，排名第二。</p>
-<p>文档分为三个部分，分别为”配准“，”识别“，”匹配“三个内容。</p>
-<h2 id="比赛任务"><a href="#比赛任务" class="headerlink" title="比赛任务"></a>比赛任务</h2><p>本次任务中，参赛队伍将获得某公司人力部门所提供的近1000份应聘人员登记表格扫描图片，其中包含应聘人员的性别、民族、生日和教育经历等基本信息（姓名联系方式亲属等个人身份敏感信息已进行严格脱敏处理），还包括应聘者的个人学术或生活中所获荣誉与工作技能。参赛者需要利用得到的近1000张扫描件进行模型构建，从每个pdf文件中监测到表格，并从表格中提取指定类别的内容，准确地识别更多的类似档案扫描文件。</p>
-<p>本次比赛没有提供训练集，选手需自行寻找手写体数据，以完成模型的训练。测试集数据为脱敏后的《应聘登记表》，共有990张图片，是脱敏后的“应聘登记表”的扫描文件。每一份应聘登记表都包括应聘者性别、民族、生日、教育经历等基本信息，以及工作技能等求职相关信息。所有图片被分为2组，分别是为线上测试集和线下测试集。线上测试集共398张图片，可供参赛者下载，用于计算线上排名和调整模型；线下测试集，共592张（不提供下载），用于线下审核检查。</p>
-<p>本次比赛的评分标准为编辑距离，同时考虑识别结果与正确结果之间的”增删改“。其中编辑距离的公式如下：</p>
-<p>$$ Score = \frac{1}{M} \sum_{i=1}^{m} \sum_{j=1}^{n}d_{ij} $$</p>
-<p>其中M为所有简历中待识别字段中的总汉字数量，m为简历的数量，n为简历中待识别的字段数量，d<sub>ij</sub>为第i份简历中第j个字段的编辑距离。</p>
-<p>本次比赛的难点在于手写体的识别。由于汉字字符多，手写随意性大，相似和混淆汉字对多，另外公开提供的手写训练集也少，所以这是这次比赛的最大难点。</p>
-<h2 id="配准"><a href="#配准" class="headerlink" title="配准"></a>配准</h2><h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h3><p>图像配准(registration)是指同一区域内以不同成像手段所获得的不同图像图形的坐标的匹配。包括几何纠正、投影变换与统一比例尺三方面的处理。图像配准在目标检测、模型重建、运动估计、特征匹配，肿瘤检测、病变定位、血管造影、地质勘探、航空侦察等领域都有广泛的应用。简单来说，就是将所有图片都转换成同一样子，包括图片中的重要元素位置也都处于相同的位置，这样的话方便后续的分析。</p>
-<p>本次比赛提供的数据为扫描版的简历。扫描时由于对简历放置的不规范，导致扫描成像的简历图片中的简历信息区域有歪斜。有歪斜会对后续的识别过程有很大影响。比如在歪斜情况下，对于ROI区域的裁剪就会有很大概率将表格线裁入其中，影响识别结果。同时，各个图片歪斜的角度和范围也不一致，会对后续的各个过程带来不同程度的影响。所以将所有图片处理成同一版式，确保各个图片的重要元素都在相同的位置，对后续的识别过程有很好的帮助。这就是配准的目的。</p>
-<p>根据待配准图像之间的关系，可以将图像配准分为多源图像配准、基于模板的配准、多角度图像配准、时间序列图像配准四大类。在本次比赛中，我们配准的类别属于基于模板的配准，它的方法特点是根据模板预先选定特征信息，根据这些信息再去配准待配准图像。常见的应用场景有模式识别，字符识别，标识确认，波形分析等。</p>
-<p>图像配准的算法有很多，比如SIFT算法，SURF算法等。经过我们的实验，最后选取了SIFT算法作为我们的配准算法。</p>
-<p>尺度不变特征转换(Scale-invariant feature transform或SIFT)是一种CV的算法，用来侦测与描述影像中的局部性特征，它在空间尺度中寻找极值点，并提取出其位置、尺度、旋转不变量。</p>
-<p>SIFT算法的特点有：</p>
-<ul>
-<li>SIFT特征是图像的局部特征，其对旋转、尺度缩放、亮度变化保持不变性，对视角变化、仿射变换、噪声也保持一定程度的稳定性</li>
-<li>独特性好，信息量丰富，适用于在海量特征数据库中进行快速、准确的匹配</li>
-<li>多量性，即使少数的几个物体也可以产生大量的SIFT特征向量</li>
-<li>高速性，经优化的SIFT匹配算法甚至可以达到实时的要求</li>
-<li>可扩展性，可以很方便的与其他形式的特征向量进行联合</li>
-</ul>
-<p>SIFT算法分解分为四步：</p>
-<ol>
-<li>尺度空间极值检测：搜索所有尺度上的图像位置。通过高斯微分函数来识别潜在的对于尺度和旋转不变的兴趣点。</li>
-<li>关键点定位：在每个候选的位置上，通过一个拟合精细的模型来确定位置和尺度。关键点的选择依据于它们的稳定程度。</li>
-<li>方向确定：基于图像局部的梯度方向，分配给每个关键点位置一个或多个方向。所有后面的对图像数据的操作都相对于关键点的方向、尺度和位置进行变换，从而提供对于这些变换的不变性。</li>
-<li>关键点描述：在每个关键点周围的邻域内，在选定的尺度上测量图像局部的梯度。这些梯度被变换成一种表示，这种表示允许比较大的局部形状的变形和光照变化。</li>
-</ol>
-<h3 id="做法"><a href="#做法" class="headerlink" title="做法"></a>做法</h3><ol>
-<li><p>模板配准1：首先对官方提供的下载文档进行模板配准，以使得所有简历的相对位置保持一致。由于2011年的简历、2013年以后的简历样式存在差别，本组考虑用两套模板进行配准工作。第一套以简历左上半部分的个人基本信息作为模板分类的依据，简历被分为了两类，两类的区别对比如下图所示：</p>
-<p><img src="/images/hualu/1540100760115.png" alt="1540100760115"></p>
-<p><img src="/images/hualu/1540100772779.png" alt="1540100772779"></p>
-</li>
-<li><p>模板配准2：第二套以简历左下半部分的学历信息作为模板分类的依据，主要为了提取“是否毕业”字段，简历被分为了三类，三类的区别对比如下图所示：</p>
-<p>​                                               <img src="/images/hualu/1540100801041.png" alt="1540100801041">                  <img src="/images/hualu/1540100806144.png" alt="1540100806144">                <img src="/images/hualu/1540100812088.png" alt="1540100812088"></p>
-<p>简历配准主要使用了SIFT算法。</p>
-<p>在简历分类时，以第一套模板为例，首先选好两张样式不同且扫描规范的简历图片作为源图片（20110029.jpg和20130143.jpg），再将所有官方提供的简历图片（即目的图片）依次与源图片的匹配坐标点个数进行比较。目的图片和哪一张源图片的匹配坐标点个数最多，就被分类至该源图片所在的类中；</p>
-<p>在简历配准时，依据SIFT算法配准的原理，先找到变换矩阵M，再将目的图片向源图片配准，使得匹配坐标点重合在一起，这样便完成了配准工作。</p>
-</li>
-<li><p>抠图：在两个模板的配准工作结束后，所有简历的相对坐标位置已经能保持相同，这样便可以直接通过简历图片的像素坐标值把性别、体重、血型等信息依次取出。</p>
-</li>
-<li><p>创建提交模板文件：为使得每次成绩提交有效，首先需要依据提交格式创建模板文件：首先‘登记表编号’字段通过遍历官方提供的简历图片的名称得到，其他诸如‘性别’、‘民族’等字段的信息直接赋值为‘无’。</p>
-</li>
-</ol>
-<h2 id="识别"><a href="#识别" class="headerlink" title="识别"></a>识别</h2><p>识别过程由两个队友共同完成。整体思路是对每个字段单独开发识别方法，最后进行整合。</p>
-<ol>
-<li><p>对于是否毕业，体重，血型，本科起止时间等字段：</p>
-<ul>
-<li>添加是否毕业信息：待识别的字段中包含高中、大专、本科、研究生四个阶段的是否毕业选项，这几个字段的内容和其余字段不同，是以打钩的方式完成填写而非手写文字的形式。因此在识别这些字段时，首先通过步骤3抠图精确定位需要打钩的方框位置，再比较‘是’和‘否’两方框像素值之和的大小。由于打钩的方框中所含黑色像素较多，因此像素值之和会比空白方框更小，因此在设定合适阈值之后，‘是否毕业’四个字段的内容可以非常精确地识别出来。提交结果显示，仅识别这四个字段的分数即可达到0.287。</li>
-<li>添加体重信息：在抠图拿到体重字段的图片后，首先对图片进行预处理，包括数字分割以及二值化和缩放操作，使得其大小与mnist数据集的输入保持一致，均为28x28像素。预处理达到的效果如下图所示：</li>
-</ul>
-<p>​                                          <img src="/images/hualu/1540100900936.png" alt="1540100900936">               <img src="/images/hualu/1540101166120.png" alt="1540101166120"></p>
-<ul>
-<li><p>添加血型信息：在抠图拿到体重字段的图片后，首先对图片进行预处理，包括数字分割以及二值化和缩放操作，使得其大小与mnist数据集的输入保持一致，均为28x28像素。预处理达到的效果如下图所示：</p>
-<p>​                                                             <img src="/images/hualu/1540102505656.png" alt="1540102505656">                     <img src="/images/hualu/1540102511206.png" alt="1540102511206">           </p>
-<p>然后搭建一个2层的卷积神经网络，卷积核大小为5x5，池化层大小为3x3，以mnist扩展数据集emnist-letter为基础，只保留A、B、O三个字母的训练图片，加上部分手工标注数据作为训练集对网络进行训练，再对预处理后的图片进行识别。</p>
-</li>
-<li><p>添加本科起止时间信息：由于起止时间在抠图拿到体重字段的图片后，首先对图片进行预处理，包括数字分割以及二值化和缩放操作，使得其大小与mnist数据集的输入保持一致，均为28x28像素。</p>
-<p>然后搭建一个2层的卷积神经网络，卷积核大小为5x5，池化层大小为2x2，以原始mnist数据集加上部分手工标注数据作为训练集对网络进行训练，再对预处理后的图片进行识别。</p>
-</li>
-</ul>
-</li>
-<li><p>对于其他字段：</p>
-<ul>
-<li>神经网络结构为：数据输入-卷积-池化-卷积-池化-卷积-池化-卷积-卷积-池化-全连接。卷积核大小为3x3，步长为1。</li>
-<li>训练数据集为中科院发布的手写汉字数据集，并根据需要进行数据预处理，主要包括：添加噪声，图片切割的方式。</li>
-</ul>
-</li>
-</ol>
-<h2 id="匹配"><a href="#匹配" class="headerlink" title="匹配"></a>匹配</h2><p>匹配功能就是在上一步神经网络识别字段完成后，由于识别出来的字段不一定正确，在识别结果的基础上与语料库进行比对，将错误识别的字段进行修正，从而获得正确的字段。</p>
-<p>我们进行匹配的字段有民族，籍贯，高中学校、专业、学位，大专学校、专业、学位，本科学校、专业、学位，研究生学校、专业、学位等。其中籍贯语料库的获取从网上公开资料获得，大专，本科，研究生学校及专业从教育部官网中获得，并进行整理。</p>
-<p>匹配的输入为神经网络对相应字段识别出的Top3的结果，程序对Top3结果进行组合，通过正则匹配等方法在语料库中寻找对应的正确字段，从而进行修正。</p>
-<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>由于组员的分工不同，所擅长的编程语言不同，本项目中的语言大部分为Python，一小部分为C++，所依赖的环境有OpenCV，TensorFlow等。</p>
-<ul>
-<li><p>系统环境为Ubuntu 16.04</p>
-</li>
-<li><p>Python的版本为3.5</p>
-</li>
-<li><p>OpenCV版本</p>
-<ul>
-<li><p>图像ROI裁剪的OpenCV版本是编译的opencv-2.4.13.6</p>
-<p> Python所需版本为：</p>
-</li>
-<li><p><code>pip3 install opencv-contrib-python==3.3.0</code></p>
-</li>
-</ul>
-</li>
-<li><p>TensorFlow版本为1.4.0</p>
-</li>
-</ul>
-<h2 id="代码结构"><a href="#代码结构" class="headerlink" title="代码结构"></a>代码结构</h2><ol>
-<li><p>配准及识别部分字段文件夹</p>
-<p><img src="/images/hualu/1540103618643.png" alt="1540103618643"></p>
-<p>文件包含内容为：</p>
-<ul>
-<li>EMNIST_Dataset: 训练模型所用的手写数字数据集和手写字母数据集</li>
-<li>Initial: 官方提供的简历样本集合</li>
-<li>models_AB: 训练好的血型模型</li>
-<li>models_kg: 训练好的体重模型</li>
-<li>module_partition: 根据登记表编号分为398个文件夹，每个文件夹均包含29个待识别模块</li>
-<li>prepare_image_AB: 将血型模块字母分开后的模型输入，每个输入的图片大小为28x28</li>
-<li>prepare_image_kg: 将体重模块数字分开后的模型输入，每个输入的图片大小为28x28</li>
-<li>prepare_image_time: 将本科起止时间中数字分开后的输入，每个输入的图片大小为28x28</li>
-<li>template_registration: 模板配准后的结果，module为第一个模板，用于切分简历上半部分的待识别模块，如性别、体重、血型等；yes_no为第二个模板，用于切分简历下半部分的待识别模块，如学校、学位、是否毕业等</li>
-<li>baseline.csv: 根据提交格式创建出的提交模板</li>
-<li>add_true_false_5.csv: 在baseline基础上添加高中、大专、本科、研究生是否毕业4个字段</li>
-<li>add_weight_6.csv：在<em>5基础上添加体重字段</em></li>
-<li>_add_blood_7.csv: 在_6基础上添加血型字段</li>
-<li>add_time_8.csv：在_7基础上添加本科起止时间字段</li>
-<li>AB_train.py: 血型模型的训练过程（无需手动运行，否则覆盖models_AB中的内容）</li>
-<li>kg_train.py: 体重模型的训练过程（无需手动运行，否则覆盖models_kg中的内容）</li>
-<li>main.py: 主函数，涵盖了本部分的所有运行代码，直接运行即可。</li>
-</ul>
-<p>打开main.py，其中主函数部分如图所示，每部分实现功能均在注释中标出：</p>
-<p><img src="/images/hualu/1540103735382.png" alt="1540103735382"></p>
-</li>
-<li><p>其他长文本字段识别</p>
-<p><img src="C:\Users\zhou\Desktop\批注.png" alt></p>
-<p>文件包含内容为：</p>
-<ul>
-<li>checkpointxuexiaoexpand: 识别学校名称字段的模型</li>
-<li>jiguancheckpoint: 识别籍贯的模型</li>
-<li>minzucheckpoint: 识别民族的模型</li>
-<li>xingbie: 识别性别的模型</li>
-<li>zhuanyecheckpoint: 识别专业模型</li>
-<li>roi: 存放处理后数据的文件，每份简历根据字段的位置提取相关区域进行单独识别，不同的字段对应不同的识别模型</li>
-<li>crop_roi_all.cc：对配准后的图片进行ROI区域裁剪</li>
-<li>fenlei.py: 用于简历配准后的分类</li>
-<li>ocr.py: 为神经网络的训练以及调用接口</li>
-<li>demosystop3.py: 产生结果程序。程序主要流程为: 读取roi文件中的图片根据字段类型，加载不同的模型进行识别，产生csv文件。</li>
-</ul>
-</li>
-<li><p>识别结果匹配文件夹</p>
-<p><img src="C:\Users\zhou\Desktop\批注222.png" alt></p>
-<p>文件包含内容为：</p>
-<ul>
-<li>readcsv.py: 从上一步识别产生的csv文件中提取对应字段</li>
-<li>re_等文件：对对应的字段进行匹配纠正，具体功能从文件名中可获得。其中 re_functions.py 定义了一些每个文件所需要的一些函数</li>
-<li>writecsv.py：将识别纠正的结果覆盖到原来的csv中，产生最终版结果。</li>
-<li>语料库文件：从公开资料获得到的各个语料信息。</li>
-</ul>
-</li>
-</ol>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>我们提交的文件中包含了所有文件。具体的执行流程可以参见batch.sh中的语句。也可以直接运行。</p>
-<p>由于整个项目代码由各个队友按照任务分别完成，在整合到一起后未经过长时间的测试，所以在代码衔接部分有可能出现问题。此类状况出现时烦请联系我们，我们会及时进行反馈。</p>
-
-          
+          项目说明本次的赛题名称为“汉字档案手写识别大赛“，是“中国华录杯·开放数据创新应用大赛”复赛。最后我们队伍的成绩以编辑距离为评判准则，分数为0.18151，排名第二。
+文档分为三个部分，分别为”配准“，”识别“，”匹配“三个内容。
+比赛任务本次任务中，参赛队伍将获得某公司人力部门所提供的近1000份应聘人员登记表格扫描图片，其中包含应聘人员的性别、民族、生日和教育经历等基本信息（姓名联系方式亲属等
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/10/21/华录杯项目说明/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -699,7 +536,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -761,44 +598,19 @@
       
         
           
-            <h1 id="Spark中SVM分析"><a href="#Spark中SVM分析" class="headerlink" title="Spark中SVM分析"></a>Spark中SVM分析</h1><p>mllib中的svm只实现了线性二分类，没有非线性（核函数），也没有多分类和回归。</p>
-<p>其中在初始化的时候，选取的是SGD(stochastic gradient descent)算法，在该算法运行的过程中，体现了spark的分布式运行。</p>
-<h2 id="MlLib中SVM实现"><a href="#MlLib中SVM实现" class="headerlink" title="MlLib中SVM实现"></a>MlLib中SVM实现</h2><p>以下是svm的类的关系图（网上download的）：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/967544-bf2bb84db9564edf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/620/format/webp" alt="SVM"></p>
-<h3 id="一-程序入口"><a href="#一-程序入口" class="headerlink" title="一. 程序入口"></a>一. 程序入口</h3><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SVMWithSGD</span> <span class="title">private</span> (<span class="params"></span></span></span><br><span class="line"><span class="class"><span class="params">    private var stepSize: <span class="type">Double</span>,</span></span></span><br><span class="line"><span class="class"><span class="params">    private var numIterations: <span class="type">Int</span>,</span></span></span><br><span class="line"><span class="class"><span class="params">    private var regParam: <span class="type">Double</span>,</span></span></span><br><span class="line"><span class="class"><span class="params">    private var miniBatchFraction: <span class="type">Double</span></span>)</span></span><br><span class="line"><span class="class">  <span class="keyword">extends</span> <span class="title">GeneralizedLinearAlgorithm</span>[<span class="type">SVMModel</span>] <span class="keyword">with</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 定义了损失函数和优化函数</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> gradient = <span class="keyword">new</span> <span class="type">HingeGradient</span>()</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">val</span> updater = <span class="keyword">new</span> <span class="type">SquaredL2Updater</span>()</span><br><span class="line">  <span class="meta">@Since</span>(<span class="string">"0.8.0"</span>)</span><br><span class="line">  <span class="comment">// new了一个梯度下降的类，命名为optimizer</span></span><br><span class="line">  <span class="keyword">override</span> <span class="keyword">val</span> optimizer = <span class="keyword">new</span> <span class="type">GradientDescent</span>(gradient, updater)</span><br><span class="line">    .setStepSize(stepSize)</span><br><span class="line">    .setNumIterations(numIterations)</span><br><span class="line">    .setRegParam(regParam)</span><br><span class="line">    .setMiniBatchFraction(miniBatchFraction)</span><br><span class="line">  <span class="keyword">override</span> <span class="keyword">protected</span> <span class="keyword">val</span> validators = <span class="type">List</span>(<span class="type">DataValidators</span>.binaryLabelValidator)</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Construct a SVM object with default parameters: &#123;stepSize: 1.0, numIterations: 100,</span></span><br><span class="line"><span class="comment">   * regParm: 0.01, miniBatchFraction: 1.0&#125;.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="meta">@Since</span>(<span class="string">"0.8.0"</span>)</span><br><span class="line">  <span class="comment">// 默认参数</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">this</span></span>() = <span class="keyword">this</span>(<span class="number">1.0</span>, <span class="number">100</span>, <span class="number">0.01</span>, <span class="number">1.0</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">override</span> <span class="keyword">protected</span> <span class="function"><span class="keyword">def</span> <span class="title">createModel</span></span>(weights: <span class="type">Vector</span>, intercept: <span class="type">Double</span>) = &#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="type">SVMModel</span>(weights, intercept)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>SVMWithSGD</code>里面实现了SVM模型基本的一些元素，包括</p>
-<ol>
-<li>继承了<code>GeneralizedLinearAlgorithm</code></li>
-<li>定义了损失函数<code>HingeGradient()</code>，命名为 gradient</li>
-<li>定义了L2正则化<code>SquaredL2Updater()</code>，命名为updater</li>
-<li>以上面两种作为参数，new一个<code>GradientDescent()</code>，其接收的参数有两个，一个是梯度计算的损失函数，一个是优化函数，最后命名为optimizer</li>
-<li>其他就是定义一些默认参数</li>
-</ol>
-<p>之后在接下来的<code>train()</code>函数里，调用<code>run()</code>进行模型运算。这里的<code>run()</code>继承自<code>GeneralizedLinearAlgorithm</code>类。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train</span></span>(</span><br><span class="line">    input: <span class="type">RDD</span>[<span class="type">LabeledPoint</span>],</span><br><span class="line">    numIterations: <span class="type">Int</span>,</span><br><span class="line">    stepSize: <span class="type">Double</span>,</span><br><span class="line">    regParam: <span class="type">Double</span>,</span><br><span class="line">    miniBatchFraction: <span class="type">Double</span>,</span><br><span class="line">    initialWeights: <span class="type">Vector</span>): <span class="type">SVMModel</span> = &#123;</span><br><span class="line">    <span class="comment">// new了一个SVMWithSGD类，然后调用run()</span></span><br><span class="line">    <span class="keyword">new</span> <span class="type">SVMWithSGD</span>(stepSize, numIterations, regParam, miniBatchFraction)</span><br><span class="line">    .run(input, initialWeights)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="二-运行过程"><a href="#二-运行过程" class="headerlink" title="二. 运行过程"></a>二. 运行过程</h3><p><code>run()</code>函数在GeneralizedLinearAlgorithm.scala文件里。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(input: <span class="type">RDD</span>[<span class="type">LabeledPoint</span>], initialWeights: <span class="type">Vector</span>): <span class="type">M</span> = &#123;</span><br><span class="line">    <span class="comment">// 省去一些初始化和为了计算所进行的优化过程</span></span><br><span class="line">    <span class="comment">// 之前定义好的optimizer调用optimize()函数</span></span><br><span class="line">    <span class="keyword">val</span> weightsWithIntercept = optimizer.optimize(data, initialWeightsWithIntercept)</span><br><span class="line">    <span class="comment">// 其他的一些过程</span></span><br></pre></td></tr></table></figure>
-<p>在<code>run()</code>函数里，最关键的计算过程是在上一句，即由<code>new GradientDescent(gradient, updater)</code>生成的optimizer调用其<code>optimize()</code>函数进行优化。gradient是<code>HingeGradient()</code>函数，updater是<code>SquaredL2Updater()</code>。</p>
-<h3 id="三-优化过程"><a href="#三-优化过程" class="headerlink" title="三. 优化过程"></a>三. 优化过程</h3><p>在GradientDescent.scala中，定义了<code>optimize()</code>函数：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">optimize</span></span>(data: <span class="type">RDD</span>[(<span class="type">Double</span>, <span class="type">Vector</span>)], initialWeights: <span class="type">Vector</span>): <span class="type">Vector</span> = &#123;</span><br><span class="line">    <span class="comment">// 调用runMiniBatchSGD()函数</span></span><br><span class="line">    <span class="keyword">val</span> (weights, _) = <span class="type">GradientDescent</span>.runMiniBatchSGD(</span><br><span class="line">      data,</span><br><span class="line">      gradient,</span><br><span class="line">      updater,</span><br><span class="line">      stepSize,</span><br><span class="line">      numIterations,</span><br><span class="line">      regParam,</span><br><span class="line">      miniBatchFraction,</span><br><span class="line">      initialWeights,</span><br><span class="line">      convergenceTol)</span><br><span class="line">    weights</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>可以看出运行的是<code>runMiniBatchSGD()</code>函数：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">runMiniBatchSGD</span></span>(</span><br><span class="line">    data: <span class="type">RDD</span>[(<span class="type">Double</span>, <span class="type">Vector</span>)],</span><br><span class="line">    gradient: <span class="type">Gradient</span>,</span><br><span class="line">    updater: <span class="type">Updater</span>,</span><br><span class="line">    stepSize: <span class="type">Double</span>,</span><br><span class="line">    numIterations: <span class="type">Int</span>,</span><br><span class="line">    regParam: <span class="type">Double</span>,</span><br><span class="line">    miniBatchFraction: <span class="type">Double</span>,</span><br><span class="line">    initialWeights: <span class="type">Vector</span>,</span><br><span class="line">    convergenceTol: <span class="type">Double</span>): (<span class="type">Vector</span>, <span class="type">Array</span>[<span class="type">Double</span>]) = &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 省去计算的一些过程</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (!converged &amp;&amp; i &lt;= numIterations) &#123;</span><br><span class="line">        <span class="comment">// 将weights广播出去</span></span><br><span class="line">        <span class="keyword">val</span> bcWeights = data.context.broadcast(weights)</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 以下是源码中的注释</span></span><br><span class="line">        <span class="comment">// Sample a subset (fraction miniBatchFraction) of the total data</span></span><br><span class="line">        <span class="comment">// compute and sum up the subgradients on this subset (this is one map-reduce)</span></span><br><span class="line">        <span class="keyword">val</span> (gradientSum, lossSum, miniBatchSize) = data.sample(<span class="literal">false</span>, miniBatchFraction, <span class="number">42</span> + i).treeAggregate((<span class="type">BDV</span>.zeros[<span class="type">Double</span>](n), <span class="number">0.0</span>, <span class="number">0</span>L))(</span><br><span class="line">            seqOp = (c, v) =&gt; &#123;</span><br><span class="line">                <span class="comment">// c: (grad, loss, count), v: (label, features)</span></span><br><span class="line">                <span class="keyword">val</span> l = gradient.compute(v._2, v._1, bcWeights.value, <span class="type">Vectors</span>.fromBreeze(c._1))</span><br><span class="line">                (c._1, c._2 + l, c._3 + <span class="number">1</span>)</span><br><span class="line">            &#125;,</span><br><span class="line">            combOp = (c1, c2) =&gt; &#123;</span><br><span class="line">                <span class="comment">// c: (grad, loss, count)</span></span><br><span class="line">                (c1._1 += c2._1, c1._2 + c2._2, c1._3 + c2._3)</span><br><span class="line">            &#125;)</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 销毁广播变量weights</span></span><br><span class="line">        bcWeights.destroy(blocking = <span class="literal">false</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 下面是计算完成后进行整理和输出log的一些语句</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在这个while循环计算梯度的时候，体现出spark分布式计算。</p>
-<ol>
-<li>先是由data所在的sc进行广播，将weights以广播变量的形式存入各个机器的缓存中。</li>
-<li>data为rdd格式，<ol>
-<li>调用<code>sample()</code>从每个partition中抽一些sample出来，第一个参数为<code>false</code> 意思为不放回的抽出，此时的各个sample仍在各自的partition中</li>
-<li>调用<code>treeAggregate</code>函数对每个partition中的数据进行运算，最后在driver端进行汇总。<code>treeAggregate</code>函数里面有<code>seqOp</code> 和<code>combOp</code> 两个函数，其中<code>seqOp</code>定义了在每个partition中元素的操作，<code>combOp</code>定义了各个partition中元素进行aggregate时的规则，最后在driver端进行汇总计算。</li>
-</ol>
-</li>
-</ol>
-<p>在这个里面的<code>treeAggregate</code>函数进行了类似于KMeans中<code>reduceByKey()</code>和<code>collectAsMap()</code>的两步操作。</p>
-<h3 id="四-附上HingeGradient-和SquaredL2Updater-的源码"><a href="#四-附上HingeGradient-和SquaredL2Updater-的源码" class="headerlink" title="四. 附上HingeGradient()和SquaredL2Updater()的源码"></a>四. 附上HingeGradient()和SquaredL2Updater()的源码</h3><p><code>HingeGradient()</code>的<code>compute()</code>函数:</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HingeGradient</span> <span class="keyword">extends</span> <span class="title">Gradient</span> </span>&#123;</span><br><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">compute</span></span>(</span><br><span class="line">      data: <span class="type">Vector</span>,</span><br><span class="line">      label: <span class="type">Double</span>,</span><br><span class="line">      weights: <span class="type">Vector</span>,</span><br><span class="line">      cumGradient: <span class="type">Vector</span>): <span class="type">Double</span> = &#123;</span><br><span class="line">    <span class="keyword">val</span> dotProduct = dot(data, weights)</span><br><span class="line">    <span class="comment">// Our loss function with &#123;0, 1&#125; labels is max(0, 1 - (2y - 1) (f_w(x)))</span></span><br><span class="line">    <span class="comment">// Therefore the gradient is -(2y - 1)*x</span></span><br><span class="line">    <span class="keyword">val</span> labelScaled = <span class="number">2</span> * label - <span class="number">1.0</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">1.0</span> &gt; labelScaled * dotProduct) &#123;</span><br><span class="line">      axpy(-labelScaled, data, cumGradient)</span><br><span class="line">      <span class="number">1.0</span> - labelScaled * dotProduct</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="number">0.0</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>SquaredL2Updater()</code>:</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SquaredL2Updater</span> <span class="keyword">extends</span> <span class="title">Updater</span> </span>&#123;</span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">compute</span></span>(</span><br><span class="line">      weightsOld: <span class="type">Vector</span>,</span><br><span class="line">      gradient: <span class="type">Vector</span>,</span><br><span class="line">      stepSize: <span class="type">Double</span>,</span><br><span class="line">      iter: <span class="type">Int</span>,</span><br><span class="line">      regParam: <span class="type">Double</span>): (<span class="type">Vector</span>, <span class="type">Double</span>) = &#123;</span><br><span class="line">    <span class="comment">// add up both updates from the gradient of the loss (= step) as well as</span></span><br><span class="line">    <span class="comment">// the gradient of the regularizer (= regParam * weightsOld)</span></span><br><span class="line">    <span class="comment">// w' = w - thisIterStepSize * (gradient + regParam * w)</span></span><br><span class="line">    <span class="comment">// w' = (1 - thisIterStepSize * regParam) * w - thisIterStepSize * gradient</span></span><br><span class="line">    <span class="keyword">val</span> thisIterStepSize = stepSize / math.sqrt(iter)</span><br><span class="line">    <span class="keyword">val</span> brzWeights: <span class="type">BV</span>[<span class="type">Double</span>] = weightsOld.asBreeze.toDenseVector</span><br><span class="line">    brzWeights :*= (<span class="number">1.0</span> - thisIterStepSize * regParam)</span><br><span class="line">    brzAxpy(-thisIterStepSize, gradient.asBreeze, brzWeights)</span><br><span class="line">    <span class="keyword">val</span> norm = brzNorm(brzWeights, <span class="number">2.0</span>)</span><br><span class="line"></span><br><span class="line">    (<span class="type">Vectors</span>.fromBreeze(brzWeights), <span class="number">0.5</span> * regParam * norm * norm)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          Spark中SVM分析mllib中的svm只实现了线性二分类，没有非线性（核函数），也没有多分类和回归。
+其中在初始化的时候，选取的是SGD(stochastic gradient descent)算法，在该算法运行的过程中，体现了spark的分布式运行。
+MlLib中SVM实现以下是svm的类的关系图（网上download的）：
 
-          
+一. 程序入口1234567891011121314151617
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/10/12/Spark中SVM doc/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -854,7 +666,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -916,72 +728,15 @@
       
         
           
-            <h1 id="KMeans"><a href="#KMeans" class="headerlink" title="KMeans"></a>KMeans</h1><h2 id="例子代码"><a href="#例子代码" class="headerlink" title="例子代码"></a>例子代码</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.ml.clustering.&#123;<span class="type">KMeans</span>,<span class="type">KMeansModel</span>&#125;</span><br><span class="line"><span class="keyword">import</span> org.apache.spark.ml.linalg.<span class="type">Vector</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.ml.linalg.<span class="type">Vectors</span> <span class="comment">// 原文是Vectors，但是出错，经过搜索发现是Vector :http://lxw1234.com/archives/2016/01/605.htm</span></span><br><span class="line"><span class="keyword">import</span> spark.implicits._   <span class="comment">//开启隐式转换</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">model_instance</span> (<span class="params">features: <span class="type">Vector</span></span>)    <span class="title">//开启隐式转换和创建这个model_instance（好像）是调用</span> .<span class="title">toDF</span>(<span class="params"></span>) <span class="title">的必要条件</span></span></span><br><span class="line"><span class="class"> </span></span><br><span class="line"><span class="class"><span class="title">val</span> <span class="title">rawData</span> </span>= sc.textFile(<span class="string">"hdfs://lotus02:9000/user/chzhou/data.txt"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> df = rawData.map(line =&gt;</span><br><span class="line">    &#123; model_instance( <span class="type">Vectors</span>.dense(line.split(<span class="string">","</span>).filter(p =&gt; p.matches(<span class="string">"\\d*(\\.?)\\d*"</span>))    <span class="comment">// '\\d'为匹配数字</span></span><br><span class="line">        .map(_.toDouble)) )&#125;).toDF()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> kmeansmodel = <span class="keyword">new</span> <span class="type">KMeans</span>().</span><br><span class="line">    setK(<span class="number">3</span>).</span><br><span class="line">    setFeaturesCol(<span class="string">"features"</span>).</span><br><span class="line">    setPredictionCol(<span class="string">"prediction"</span>).</span><br><span class="line">    fit(df)</span><br></pre></td></tr></table></figure>
-<p>数据采用的是<a href="http://dblab.xmu.edu.cn/blog/wp-content/uploads/2017/03/iris.txt" target="_blank" rel="noopener">iris</a>数据，有四个实数值的特征，分别代表花朵四个部位的尺寸，以及该样本对应鸢尾花的亚种类型（共有3种亚种类型）。</p>
-<h2 id="过程分析"><a href="#过程分析" class="headerlink" title="过程分析"></a>过程分析</h2><p>对程序在spark-shell中按条输入，在最后一步 KMeans.fit(df) 的时候整个程序转换才开始进行。</p>
-<p>整个程序总共有9个job，如下图所示：</p>
-<p><img src="https://i.loli.net/2018/10/11/5bbea460c3933.png" alt="job.png"></p>
-<p>总共分为13个stage，如下图所示：</p>
-<p><img src="https://i.loli.net/2018/10/11/5bbea4852f2a3.png" alt="stage.png"></p>
-<p>虽然有13个，但是总共可以分为4个阶段，分别对应kmeans实现的4个阶段</p>
-<h2 id="spark中kmeans实现"><a href="#spark中kmeans实现" class="headerlink" title="spark中kmeans实现"></a>spark中kmeans实现</h2><p>本次导入的库为spark中ml包。实际上ml中的kmeans只是对mllib中kmeans的封装，mllib.KMeans的接口是基于RDD的，而ml.KMeans的接口是基于DataFrame的。所以在调用ml.KMeans的fit( )函数后，内部其实是对DataFrame进行转换，转换为RDD形式，再将数据作为输入对mllib.KMeans进行调用从而训练模型，训练完后再返回给ml.KMeans。</p>
-<p>mllib.KMeans中，在选取初始点时，实际上默认的算法采用的是KMeans||算法（算法的lineage是：普通kmeans -&gt; kmeans++ -&gt; KMeans||)。其实最主要的不同之处在于选取初始质心的策略上。经典的Kmeans算法的缺点在于需要预先指定k值以及对初始选取的质心比较敏感。为了解决该问题提出了<a href="https://en.wikipedia.org/wiki/K-means++" target="_blank" rel="noopener">kmeans++算法</a>，对于质心的选择进行了改变，但是问题在于算法必须顺序执行，无法并行扩展。针对此问题又提出了KMeans||算法，<a href="http://theory.stanford.edu/~sergei/papers/vldb12-kmpar.pdf" target="_blank" rel="noopener">论文在这里</a>。</p>
-<h3 id="ml-KMeans"><a href="#ml-KMeans" class="headerlink" title="ml.KMeans"></a>ml.KMeans</h3><p>在ml中的kmens中，先将mllib中的kmeans包进行引入，同时为了避免和ml中原有的kmeans类混淆，重新命名为MLlibKMeans，MLlibKMeansModel。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.mllib.clustering.&#123;<span class="type">DistanceMeasure</span>, <span class="type">KMeans</span> =&gt; <span class="type">MLlibKMeans</span>, <span class="type">KMeansModel</span> =&gt; <span class="type">MLlibKMeansModel</span>&#125;</span><br></pre></td></tr></table></figure>
-<p>函数的训练入口是fit()函数，从这里开始，并且先将DataFrame转化为rdd形式</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">fit</span></span>(dataset: <span class="type">Dataset</span>[_]): <span class="type">KMeansModel</span> = instrumented &#123; instr =&gt;</span><br><span class="line">    transformSchema(dataset.schema, logging = <span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> handlePersistence = dataset.storageLevel == <span class="type">StorageLevel</span>.<span class="type">NONE</span></span><br><span class="line">    <span class="keyword">val</span> instances = <span class="type">DatasetUtils</span>.columnToOldVector(dataset, getFeaturesCol)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (handlePersistence) &#123;</span><br><span class="line">      instances.persist(<span class="type">StorageLevel</span>.<span class="type">MEMORY_AND_DISK</span>)</span><br><span class="line">    &#125;   <span class="comment">//将rdd的存储等级设置为StorageLevel.MEMORY_AND_DISK</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 不知道在干什么。。。是调用的ml库自己的instrument方法（没影响）</span></span><br><span class="line">    instr.logPipelineStage(<span class="keyword">this</span>)</span><br><span class="line">    instr.logDataset(dataset)</span><br><span class="line">    instr.logParams(<span class="keyword">this</span>, featuresCol, predictionCol, k, initMode, initSteps, distanceMeasure,maxIter, seed, tol)</span><br></pre></td></tr></table></figure>
-<p>然后将ml中自己的kmeans模型参数送入mllib的模型中，命名为algo.</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> algo = <span class="keyword">new</span> <span class="type">MLlibKMeans</span>()</span><br><span class="line">      .setK($(k))</span><br><span class="line">      .setInitializationMode($(initMode))</span><br><span class="line">      .setInitializationSteps($(initSteps))</span><br><span class="line">      .setMaxIterations($(maxIter))</span><br><span class="line">      .setSeed($(seed))</span><br><span class="line">      .setEpsilon($(tol))</span><br><span class="line">      .setDistanceMeasure($(distanceMeasure))</span><br></pre></td></tr></table></figure>
-<p>调用mllib中kmeans的run()函数，进行运算。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> parentModel = algo.run(instances, <span class="type">Option</span>(instr))</span><br></pre></td></tr></table></figure>
-<p>此时进入mllib中的kmeans模型实现函数。</p>
-<h3 id="mllib-KMeans"><a href="#mllib-KMeans" class="headerlink" title="mllib.KMeans"></a>mllib.KMeans</h3><p>在mllib.kmeans中，执行的大致顺序如下：</p>
-<ol>
-<li>将rdd中的point变为（point，norm）形式。其中point的存储形式是vector，norm是二范数，即point的向量模。有了模之后方便以后计算各个点之间的距离。</li>
-<li>用initRandom或者initKMeansParallel方法进行对初始中心点的选择。其中默认的方式是initKmeansParallel方法，也就是KMeans||算法</li>
-<li>在初始的中心点选择好后，进行对模型的收敛计算，直到达到允许的误差值内或者达到最大迭代计算次数。</li>
-<li>返回模型</li>
-</ol>
-<h4 id="一-rdd中point转换"><a href="#一-rdd中point转换" class="headerlink" title="一. rdd中point转换"></a>一. rdd中point转换</h4><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[spark] <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(</span><br><span class="line">      data: <span class="type">RDD</span>[<span class="type">Vector</span>],</span><br><span class="line">      instr: <span class="type">Option</span>[<span class="type">Instrumentation</span>]): <span class="type">KMeansModel</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (data.getStorageLevel == <span class="type">StorageLevel</span>.<span class="type">NONE</span>) &#123;</span><br><span class="line">      logWarning(<span class="string">"The input data is not directly cached, which may hurt performance if its"</span></span><br><span class="line">        + <span class="string">" parent RDDs are also uncached."</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 计算模并且缓存下来</span></span><br><span class="line">    <span class="keyword">val</span> norms = data.map(<span class="type">Vectors</span>.norm(_, <span class="number">2.0</span>))</span><br><span class="line">    norms.persist()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将模与原来的rdd中的点zip在一起</span></span><br><span class="line">    <span class="keyword">val</span> zippedData = data.zip(norms).map &#123; <span class="keyword">case</span> (v, norm) =&gt;</span><br><span class="line">      <span class="keyword">new</span> <span class="type">VectorWithNorm</span>(v, norm)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 调用runAlgorithm()进行计算</span></span><br><span class="line">    <span class="keyword">val</span> model = runAlgorithm(zippedData, instr)</span><br></pre></td></tr></table></figure>
-<h4 id="二-初始化中心点"><a href="#二-初始化中心点" class="headerlink" title="二. 初始化中心点"></a>二. 初始化中心点</h4><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">runAlgorithm</span></span>(</span><br><span class="line">      data: <span class="type">RDD</span>[<span class="type">VectorWithNorm</span>],</span><br><span class="line">      instr: <span class="type">Option</span>[<span class="type">Instrumentation</span>]): <span class="type">KMeansModel</span> = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> sc = data.sparkContext</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> initStartTime = <span class="type">System</span>.nanoTime()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> distanceMeasureInstance = <span class="type">DistanceMeasure</span>.decodeFromString(<span class="keyword">this</span>.distanceMeasure)</span><br><span class="line"></span><br><span class="line">    <span class="comment">//在这里可以看出，除非指明初始化的方法为initRandom，否则默认为initKmeansParallel</span></span><br><span class="line">    <span class="keyword">val</span> centers = initialModel <span class="keyword">match</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="type">Some</span>(kMeansCenters) =&gt;</span><br><span class="line">        kMeansCenters.clusterCenters.map(<span class="keyword">new</span> <span class="type">VectorWithNorm</span>(_))</span><br><span class="line">      <span class="keyword">case</span> <span class="type">None</span> =&gt;</span><br><span class="line">        <span class="keyword">if</span> (initializationMode == <span class="type">KMeans</span>.<span class="type">RANDOM</span>) &#123;</span><br><span class="line">          initRandom(data)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          initKMeansParallel(data, distanceMeasureInstance)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>下面进入initKMeansParallel方法:</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[clustering] <span class="function"><span class="keyword">def</span> <span class="title">initKMeansParallel</span></span>(data: <span class="type">RDD</span>[<span class="type">VectorWithNorm</span>],</span><br><span class="line">      distanceMeasureInstance: <span class="type">DistanceMeasure</span>): <span class="type">Array</span>[<span class="type">VectorWithNorm</span>] = &#123;</span><br><span class="line">    <span class="comment">// 初始化costs</span></span><br><span class="line">    <span class="keyword">var</span> costs = data.map(_ =&gt; <span class="type">Double</span>.<span class="type">PositiveInfinity</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在rdd中随机选一个点</span></span><br><span class="line">    <span class="keyword">val</span> seed = <span class="keyword">new</span> <span class="type">XORShiftRandom</span>(<span class="keyword">this</span>.seed).nextInt()</span><br><span class="line">    <span class="keyword">val</span> sample = data.takeSample(<span class="literal">false</span>, <span class="number">1</span>, seed)</span><br><span class="line">    </span><br><span class="line">    require(sample.nonEmpty, <span class="string">s"No samples available from <span class="subst">$data</span>"</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将随机选的那一个点作为第一个中心点</span></span><br><span class="line">    <span class="keyword">val</span> centers = <span class="type">ArrayBuffer</span>[<span class="type">VectorWithNorm</span>]()</span><br><span class="line">    <span class="keyword">var</span> newCenters = <span class="type">Seq</span>(sample.head.toDense)</span><br><span class="line">    centers ++= newCenters</span><br></pre></td></tr></table></figure>
-<p>takesample此时发生了rdd的计算，这时候的过程对应于stage 0 和 stage 1。</p>
-<p>接下来通过多次循环计算，取得所有的初始化中心点。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> step = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//用来存储每次产生的中心点，并且是broadcast类型</span></span><br><span class="line"><span class="keyword">val</span> bcNewCentersList = <span class="type">ArrayBuffer</span>[<span class="type">Broadcast</span>[_]]()</span><br><span class="line"><span class="keyword">while</span> (step &lt; initializationSteps) &#123;</span><br><span class="line">    <span class="comment">// 每次把上一次算出来的newCenters广播出去</span></span><br><span class="line">    <span class="keyword">val</span> bcNewCenters = data.context.broadcast(newCenters)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 把新算出来的点加到里面</span></span><br><span class="line">    bcNewCentersList += bcNewCenters</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 计算data里面点的cost值</span></span><br><span class="line">    <span class="keyword">val</span> preCosts = costs</span><br><span class="line">    costs = data.zip(preCosts).map &#123; <span class="keyword">case</span> (point, cost) =&gt;</span><br><span class="line">        math.min(distanceMeasureInstance.pointCost(bcNewCenters.value, point), cost)</span><br><span class="line">    &#125;.persist(<span class="type">StorageLevel</span>.<span class="type">MEMORY_AND_DISK</span>)</span><br><span class="line">    <span class="keyword">val</span> sumCosts = costs.sum()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将broadcast变量销毁</span></span><br><span class="line">    bcNewCenters.unpersist(blocking = <span class="literal">false</span>)</span><br><span class="line">    preCosts.unpersist(blocking = <span class="literal">false</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 开始选点，每次循环根据距中心点的距离成比例地选取 2 * k 个点</span></span><br><span class="line">    <span class="keyword">val</span> chosen = data.zip(costs).mapPartitionsWithIndex &#123; (index, pointCosts) =&gt; <span class="keyword">val</span> rand = <span class="keyword">new</span> <span class="type">XORShiftRandom</span>(seed ^ (step &lt;&lt; <span class="number">16</span>) ^ index)</span><br><span class="line">   pointCosts.filter &#123; <span class="keyword">case</span> (_, c) =&gt; rand.nextDouble() &lt; <span class="number">2.0</span> * c * k / sumCosts &#125;.map(_._1)</span><br><span class="line">    &#125;.collect()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 把新选择出来地点变为dense格式，命名为newCenters</span></span><br><span class="line">    newCenters = chosen.map(_.toDense)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 把新的center放入到centers里面</span></span><br><span class="line">    centers ++= newCenters</span><br><span class="line">    step += <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>对循环得到的centers处理一下，先是转换为vector形式，去重，再转换为VectorWithNorm格式。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> distinctCenters = centers.map(_.vector).distinct.map(<span class="keyword">new</span> <span class="type">VectorWithNorm</span>(_))</span><br></pre></td></tr></table></figure>
-<p>如果找出来的centers比k多，通过LocalKMeans筛检出k个中心点。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (distinctCenters.size &lt;= k) &#123;</span><br><span class="line">      distinctCenters.toArray</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">val</span> bcCenters = data.context.broadcast(distinctCenters)</span><br><span class="line">      <span class="keyword">val</span> countMap = data</span><br><span class="line">        .map(distanceMeasureInstance.findClosest(bcCenters.value, _)._1)</span><br><span class="line">        .countByValue()</span><br><span class="line"></span><br><span class="line">      bcCenters.destroy(blocking = <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">val</span> myWeights = distinctCenters.indices.map(countMap.getOrElse(_, <span class="number">0</span>L).toDouble).toArray</span><br><span class="line">      <span class="type">LocalKMeans</span>.kMeansPlusPlus(<span class="number">0</span>, distinctCenters.toArray, myWeights, k, <span class="number">30</span>)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="三-对模型进行收敛计算"><a href="#三-对模型进行收敛计算" class="headerlink" title="三. 对模型进行收敛计算"></a>三. 对模型进行收敛计算</h4><p>初始化选点做完后，将中心点存入到centers中，进行收敛计算，找出最后收敛的点的集合。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (iteration &lt; maxIterations &amp;&amp; !converged) &#123;</span><br><span class="line">      </span><br><span class="line">      <span class="comment">// 用到了累加器，用来记录计算过程中整体的cost值。该变量只能通过关联操作进行“加”运算，并且在各个worker上进行同步</span></span><br><span class="line">      <span class="keyword">val</span> costAccum = sc.doubleAccumulator</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 将中心点的集合通过broadcast广播出去，在每个worker上都有一份该缓存，并且为只读</span></span><br><span class="line">      <span class="keyword">val</span> bcCenters = sc.broadcast(centers)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 对rdd中的各个partition做操作，分别找见各个partition中点的聚类中心</span></span><br><span class="line">      <span class="keyword">val</span> newCenters = data.mapPartitions &#123; points =&gt;</span><br><span class="line">        <span class="comment">// 读取中心点的数值和相关维度</span></span><br><span class="line">        <span class="keyword">val</span> thisCenters = bcCenters.value</span><br><span class="line">        <span class="keyword">val</span> dims = thisCenters.head.vector.size</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 初始化数组，第一个sums数组用来存储各个中心点中的全部点的向量和</span></span><br><span class="line">        <span class="keyword">val</span> sums = <span class="type">Array</span>.fill(thisCenters.length)(<span class="type">Vectors</span>.zeros(dims))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 第二个counts用来记录每个中心点的点簇的数量</span></span><br><span class="line">        <span class="keyword">val</span> counts = <span class="type">Array</span>.fill(thisCenters.length)(<span class="number">0</span>L)</span><br><span class="line"></span><br><span class="line">        <span class="comment">//对每个partition中的各个点做以下操作</span></span><br><span class="line">        points.foreach &#123; point =&gt;</span><br><span class="line">          <span class="comment">// 各个点与每个中心点算距离，返回其中距离最小的。其中bestCenter是中心点在centers中的index，cost是两点之间的距离</span></span><br><span class="line">          <span class="keyword">val</span> (bestCenter, cost) = distanceMeasureInstance.findClosest(thisCenters, point)</span><br><span class="line">          </span><br><span class="line">          <span class="comment">// 在全局上将cost进行累加</span></span><br><span class="line">          costAccum.add(cost)</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 把这个点与所属中心点的向量和存储到sums里面 </span></span><br><span class="line">          distanceMeasureInstance.updateClusterSum(point, sums(bestCenter))</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 该中心点下的点的个数加1</span></span><br><span class="line">          counts(bestCenter) += <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在对每个点做完以上操作后，每个partition中的点对应的中心点及其cost也都计算出来了</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对counts中大于0的进行筛选，返回index （等于0说明该中心点下没有对应的点，自然要删掉）</span></span><br><span class="line">        <span class="comment">// 返回的index形成了一个list，调用map语句对list中的每个index做一层包裹，形成 （index, (sum(index), counts(index)) 的形式</span></span><br><span class="line">        <span class="comment">// 因为mappartition要返回iterator类型，所以在后面加一个iterator</span></span><br><span class="line">        counts.indices.filter(counts(_) &gt; <span class="number">0</span>).map(j =&gt; (j, (sums(j), counts(j)))).iterator</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 下面的reduceByKey对同一个index（也就是同一个中心点）中的数据进行聚合 （因为数据分散在各个worker上）</span></span><br><span class="line">      &#125;.reduceByKey &#123; <span class="keyword">case</span> ((sum1, count1), (sum2, count2)) =&gt;</span><br><span class="line">        <span class="comment">// 对于相同的index，其中的值做以下操作</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将sum2累加到sum1中</span></span><br><span class="line">        axpy(<span class="number">1.0</span>, sum2, sum1)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将count2累加到count1上</span></span><br><span class="line">        (sum1, count1 + count2)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// collectAsMap()将所有聚合后的数据送入到driver端，让driver进行下一步操作</span></span><br><span class="line">        <span class="comment">// mapValues只对数据的value字段进行map操作，从(sum, count)信息中重新计算中心点  （数据是k-v，形式为（index, (sum(index), counts(index))）</span></span><br><span class="line">      &#125;.collectAsMap().mapValues &#123; <span class="keyword">case</span> (sum, count) =&gt;</span><br><span class="line">        distanceMeasureInstance.centroid(sum, count)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="comment">// 以上做完后就把新的中心点存入到了newCenters中</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">// 销毁掉之前centers这个广播变量</span></span><br><span class="line">      bcCenters.destroy(blocking = <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 重新进行计算，看看有没有收敛。要是没有收敛了就继续算</span></span><br><span class="line">      converged = <span class="literal">true</span></span><br><span class="line">      newCenters.foreach &#123; <span class="keyword">case</span> (j, newCenter) =&gt;</span><br><span class="line">        <span class="keyword">if</span> (converged &amp;&amp;</span><br><span class="line">          !distanceMeasureInstance.isCenterConverged(centers(j), newCenter, epsilon)) &#123;</span><br><span class="line">          converged = <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        centers(j) = newCenter</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      cost = costAccum.value</span><br><span class="line">      iteration += <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>剩下的代码就是输出一些log信息，最后返回kmeans模型。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li><p>分布式的计算体现在哪里？</p>
-<p>对模型进行收敛计算中，体现分布式的地方有两点：</p>
-<ul>
-<li><p>循环开始时：</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> costAccum = sc.doubleAccumulator</span><br><span class="line"><span class="keyword">val</span> bcCenters = sc.broadcast(centers)</span><br></pre></td></tr></table></figure>
-<p>第一个costAccum是spark的累加器的使用，它在各个worker中间进行同步。它的值仅能够通过“加”改变，所以常常被用来计数，并且只有driver能够读取它的值。在kmeans中用来记录全局的cost值。</p>
-<p>第二个bcCenters是广播变量。driver将中心点的集合通过broadcast广播出去，于是bcCenters在每个worker上都有一份缓存，并且为只读变量。</p>
-</li>
-<li><p>对中心点进行reduceByKey操作后，调用collectAsMap。这个collectAsMap的文档解释是:”Return the key-value pairs in this RDD to the <strong>master</strong> as a Map”。也就是说reduceByKey在reducer端做完后，将数据通过调用collectAsMap送入到driver端中，让driver进行接下来的运算。</p>
-</li>
-</ul>
-</li>
-<li><p>在进行reduceByKey操作时，reducer端有几个？和什么有关系？</p>
-<p>大概说一下我的理解：</p>
-<ol>
-<li><p>在mapreduce里，reducer的number是很重要的(显式指定？)。</p>
-</li>
-<li><p>而在spark中，在reducebykey时会发生shuffle，此时比较重要的是看子阶段rdd的partition个数(因为意味着数据会分在几个partition里面)。如果这个partition个数在reducebykey函数里面没有指定，则取决于partitioner中的partition个数。默认的实现是直接取spark.default.parallelism这个配置项的值作为分区数的，如果没有配置，则以RDD（即map的最后一个RDD）的分区数为准。</p>
-<p>所以在reducebykey的时候，是没有reducer端的，而是在各个partition端作sort，数据分散在该例子中的两个partition中。在此之后通过collectAsMap()将数据汇集在driver端，由driver进行之后的操作。</p>
-</li>
-</ol>
-</li>
-</ol>
-
-          
+          KMeans例子代码1234567891011121314151617181920//原文链接：http://dblab.xmu.edu.cn/blog/1454-2/import org.apache.spark.ml.clustering.&#123;KMeans,KMeansModel&#125;import org.apache.spark.ml.linalg.Vectorimport o
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/10/11/Spark中K-Means doc/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1037,7 +792,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -1099,94 +854,22 @@
       
         
           
-            <h1 id="SGX-enclave"><a href="#SGX-enclave" class="headerlink" title="SGX enclave"></a>SGX enclave</h1><h2 id="一-目标"><a href="#一-目标" class="headerlink" title="一. 目标"></a>一. 目标</h2><p>通过在SGX中实现 batcher‘s sort，进行 enclave runtime 测试</p>
-<h2 id="二-难点"><a href="#二-难点" class="headerlink" title="二. 难点"></a>二. 难点</h2><ol>
-<li><p>整个 enclave 的程序逻辑是什么？</p>
-</li>
-<li><p>enclave 如何与 不信任区（uRTS) 的data 做交互？</p>
-</li>
-<li><p>（疑问）</p>
-<p>data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函数还是sgx？</p>
-<ul>
-<li><p>如果是外部函数，因为其在不信任区，有风险</p>
-</li>
-<li><p>如果是SGX来加密，那么是如何来操作的？</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="三-流程"><a href="#三-流程" class="headerlink" title="三. 流程"></a>三. 流程</h2><ol>
-<li>在SGX内部实现batcher’s sort 算法</li>
-<li>准备数据，确定SGX如何读写数据</li>
-<li>根据数据修改算法接口</li>
-<li>进行测试</li>
-</ol>
-<h2 id="四-技术点"><a href="#四-技术点" class="headerlink" title="四. 技术点"></a>四. 技术点</h2><ol>
-<li><p>batcher sort<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Batcher_Odd-Even_Mergesort_for_eight_inputs.svg/356px-Batcher_Odd-Even_Mergesort_for_eight_inputs.svg.png" alt="batcher.jpg"></p>
-<p><img src="https://i.loli.net/2018/08/31/5b88cd1ddf834.jpg" alt="batcher.jpg"></p>
-</li>
-</ol>
-<ul>
-<li>Batcher排序网络是由一系列Batcher比较器（Batcher’s Comparator）组成的。Batcher比较器是指在两个输入端给定输入x,y，再在两个输出端输出最大值max{x,y}和最小值min{x,y}。</li>
-<li>长度为2的倍数。</li>
-<li>data-independent</li>
-</ul>
-<ol start="2">
-<li><p>SGX文件结构</p>
-<ol>
-<li><p>模块</p>
-<ul>
-<li><p>Untrusted Run-Time System (uRTS) – code that executes outside of the Intel SGX<br>enclave environment and performs functions such as:</p>
-<ul>
-<li><p>Loading and managing an enclave</p>
-</li>
-<li><p>Making calls to an enclave and receiving calls from within an enclave</p>
-</li>
-</ul>
-</li>
-<li><p>Trusted Run-Time System (tRTS) – code that executes within an Intel SGX enclave envir-<br>  onment and performs functions such as:</p>
-<ul>
-<li><p>Receiving calls into the enclave and making calls outside of an enclave</p>
-</li>
-<li><p>Managing the enclave itself</p>
-</li>
-<li><p>Standard C/C++ libraries and run-time environment</p>
-</li>
-</ul>
-</li>
-<li>Edge Routines – functions that may run outside the enclave (untrusted edge routines) or inside the enclave (trusted edge routines) and serve to bind a call from the applic-ation with a function inside the enclave or a call from the enclave with a function in the application</li>
-<li>3rd Party Libraries – for the purpose of this document, this is any library that has been tailored to work inside the Intel SGX enclave environment</li>
-</ul>
-</li>
-<li><p>两个术语：</p>
-<ul>
-<li>ECall：“Enclave Call” a call made into an interface function within the enclave</li>
-<li>OCall: “Out Call” a call made from within the enclave to the outside application</li>
-</ul>
-</li>
-<li><p>实际文件结构</p>
-<ul>
-<li><p>./App </p>
-<p>该文件夹存放应用程序中的<strong>不可信</strong>代码部分</p>
-<ul>
-<li>App.cpp文件：该文件是应用程序中的不可信部分代码，其中包括了创建Enclave及销毁Enclave的代码，也定义了一些相关的返回码供使用者查看Enclave程序的执行状态。其中的main函数是整个项目的入口函数。</li>
-</ul>
-</li>
-<li><p>./Enclave</p>
-<p>该文件夹存放应用程序中的可信代码部分和可信与不可信代码接口文件</p>
-<ul>
-<li>Enclave.config.xml文件：该文件是Enclave的配置文件，定义了Enclave中stack，heap等大小信息</li>
-<li>Enclave.cpp文件：该文件是应用程序中的可信部分代码，包括了可信函数的实现</li>
-<li>Enclave.edl文件：该文件是Enclave的接口定义文件，定义了不可信代码调用可信代码的ECALL函数接口和可信代码调用不可信代码的OECALL函数接口</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-</li>
-</ol>
+          SGX enclave一. 目标通过在SGX中实现 batcher‘s sort，进行 enclave runtime 测试
+二. 难点
+整个 enclave 的程序逻辑是什么？
 
-          
+enclave 如何与 不信任区（uRTS) 的data 做交互？
+
+（疑问）
+data进入enclave时应该为加密状态，再由enclave解密。data在 uRTS 中就应为加密状态，那么谁来给data加密？外部函
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/31/SGX Batcher‘s sort/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1242,7 +925,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -1304,40 +987,17 @@
       
         
           
-            <h1 id="Enclave文件结构"><a href="#Enclave文件结构" class="headerlink" title="Enclave文件结构"></a>Enclave文件结构</h1><p>大致总结一下Enclave的程序文件结构，参考的结构是Ubuntu 16.04 Desktop Intel SGX Linux 2.2 Release中的SampleCode文件。</p>
-<p>这里以文件中SampleEnclave文件目录为例。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── App</span><br><span class="line">│   ├── App.cpp</span><br><span class="line">│   ├── App.h</span><br><span class="line">│   ├── Edger8rSyntax</span><br><span class="line">│   │   ├── Arrays.cpp</span><br><span class="line">│   │   ├── Functions.cpp</span><br><span class="line">│   │   ├── Pointers.cpp</span><br><span class="line">│   │   └── Types.cpp</span><br><span class="line">│   └── TrustedLibrary</span><br><span class="line">│       ├── Libc.cpp</span><br><span class="line">│       ├── Libcxx.cpp</span><br><span class="line">│       └── Thread.cpp</span><br><span class="line">├── Enclave</span><br><span class="line">│   ├── config.01.xml</span><br><span class="line">│   ├── config.02.xml</span><br><span class="line">│   ├── config.03.xml</span><br><span class="line">│   ├── config.04.xml</span><br><span class="line">│   ├── Edger8rSyntax</span><br><span class="line">│   │   ├── Arrays.cpp</span><br><span class="line">│   │   ├── Arrays.edl</span><br><span class="line">│   │   ├── Functions.cpp</span><br><span class="line">│   │   ├── Functions.edl</span><br><span class="line">│   │   ├── Pointers.cpp</span><br><span class="line">│   │   ├── Pointers.edl</span><br><span class="line">│   │   ├── Types.cpp</span><br><span class="line">│   │   └── Types.edl</span><br><span class="line">│   ├── Enclave.config.xml</span><br><span class="line">│   ├── Enclave.cpp</span><br><span class="line">│   ├── Enclave.edl</span><br><span class="line">│   ├── Enclave.h</span><br><span class="line">│   ├── Enclave.lds</span><br><span class="line">│   ├── Enclave_private.pem</span><br><span class="line">│   └── TrustedLibrary</span><br><span class="line">│       ├── Libc.cpp</span><br><span class="line">│       ├── Libc.edl</span><br><span class="line">│       ├── Libcxx.cpp</span><br><span class="line">│       ├── Libcxx.edl</span><br><span class="line">│       ├── Thread.cpp</span><br><span class="line">│       └── Thread.edl</span><br><span class="line">├── Include</span><br><span class="line">│   └── user_types.h</span><br><span class="line">├── Makefile</span><br><span class="line">└── README.txt</span><br></pre></td></tr></table></figure>
-<ol>
-<li><p>App文件</p>
-<p>该文件夹存放应用程序中的<strong>不可信</strong>代码部分。</p>
-<ul>
-<li>App.cpp文件：该文件是应用程序中的不可信部分代码，其中包括了创建Enclave及销毁Enclave的代码，也定义了一些相关的返回码供使用者查看Enclave程序的执行状态。其中的main函数是整个项目的入口函数。</li>
-<li>App.h文件：该文件是应用程序中的不可信部分代码的头文件，定义了一些宏常量和函数声明。</li>
-<li>TrustedLibrary和Edger8rSyntax文件夹：提供函数库和工具</li>
-</ul>
-</li>
-<li><p>Enclave文件夹</p>
-<p>该文件夹存放应用程序中的<strong>可信代码</strong>部分和<strong>可信与不可信代码接口</strong>文件</p>
-<ul>
-<li>Enclave.config.xml文件：该文件是Enclave的配置文件，定义了Enclave的元数据信息</li>
-<li>Enclave.cpp文件：该文件是应用程序中的可信部分代码，包括了可信函数的实现</li>
-<li>Enclave.h文件：该文件是应用程序中的可信部分代码的头文件，定义了一些宏常量和函数声明</li>
-<li>Enclave.edl文件：该文件是Enclave的接口定义文件，定义了不可信代码调用可信代码的ECALL函数接口和可信代码调用不可信代码的OECALL函数接口</li>
-<li>Enclave.lds文件：该文件定义了一些Enclave可执行文件信息</li>
-<li>Enclave_private.pem文件：该文件是SGX生成的私钥</li>
-</ul>
-</li>
-<li><p>Include文件夹</p>
-<p>该文件夹存放被Enclave接口定义文件Enclave.edl使用的头文件，包括一些宏定义。</p>
-</li>
-<li><p>Makefile文件</p>
-<p>该文件是项目的编译文件，定义了项目的编译信息</p>
-</li>
-</ol>
-<p>在编译后，会生成名为 ‘app’ 的可执行文件。</p>
-<p>SampleCode文件下的其他文件大同小异，结构都差不多。</p>
-
-          
+          Enclave文件结构大致总结一下Enclave的程序文件结构，参考的结构是Ubuntu 16.04 Desktop Intel SGX Linux 2.2 Release中的SampleCode文件。
+这里以文件中SampleEnclave文件目录为例。
+12345678910111213141516171819202122232425262728293031323334353637383940
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/21/Enclave文件结构/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1393,7 +1053,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -1455,51 +1115,19 @@
       
         
           
-            <ol>
-<li><p>EPC是什么？物理位置在哪里？</p>
-<ul>
-<li>EPC:Enclave Page Cache.</li>
-<li>The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of <strong>DRAM</strong>. (which is not on CPU and it is <strong>MAIN MEMORY</strong>)</li>
-</ul>
-<p><img src="https://insujang.github.io/assets/images/170403/epc.png" alt="EPC and PRM layout"></p>
-<p>注：PRM:Processor Reserved Memory</p>
-<p>(<a href="https://insujang.github.io/2017-04-03/intel-sgx-protection-mechanism/" target="_blank" rel="noopener">参考链接</a>)</p>
-</li>
-<li><p>谁对EPC有读取权限？</p>
-<p>应用程序由可信部分和不可信部分构成。只有可信函数被调用，才能访问EPC。其他均被阻挡。<a href="https://software.intel.com/zh-cn/sgx/details" target="_blank" rel="noopener">参考链接</a></p>
-<p><img src="https://software.intel.com/sites/default/files/managed/6f/ab/runtime-execution.png" alt></p>
-</li>
-<li><p>现在的EPC是多大？</p>
-<ul>
-<li>因为EPC在内存中，而内存又被多个其他进程使用，为了不产生冲突，经过Intel分析后将大小设置为定值.<a href="https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/737218" target="_blank" rel="noopener">参考链接</a></li>
-<li>对于Win：如果OEM支持PRMRR选项（没有查到PRMRR准确定义，大概就是个选项），那么可将大小设置为32 MB, 64 MB or 128 MB。BIOS中默认大小为 128 MB.<a href="https://software.intel.com/en-us/articles/getting-started-with-sgx-sdk-for-windows" target="_blank" rel="noopener">参考链接-官网</a></li>
-<li>对于Linux：因为 Linux支持 paging 技术，而Win不支持。所以在Linux中可以突破Win的限制，在所参考的链接里大小最大达到了4G. <a href="https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/670322#comment-1878875" target="_blank" rel="noopener">参考链接-时间为16年到17年初</a></li>
-<li>在上一条的参考链接里，有条回答进行了总结：“The physical protected memory is limited to the PRMRR size set in BIOS and the max we support at this time is 128MB in Skylake. The reason why you are able to set the heapsize you set is because of the paging support in Linux driver and we don’t have this support in Windows at this time. Similar to how memory is managed in OS, enclave pages are managed similarly.”</li>
-</ul>
-</li>
-<li><p>数据送到EPC中是加密的还是未加密的？</p>
-<p>这个问题得到的资料比较混乱，现未有准确答案。只简单罗列搜索到的资料。</p>
-<ul>
-<li><p><a href="https://software.intel.com/zh-cn/sgx/details" target="_blank" rel="noopener">参考资料1</a></p>
-<p>对于enclave（中文为“围圈”），所有进程数据均以明文形式可见；外部访问围圈数据被拒绝</p>
-</li>
-<li><p><a href="https://software.intel.com/zh-cn/videos/how-to-seal-data-in-intel-sgx" target="_blank" rel="noopener">参考资料2-页面下面文字稿选项第四段</a></p>
-<p>该资料未明确提到在enclave中数据是不是加密的。但是提到将数据从enclave到不信任的内存中，需要进行sealing，即进行加密。所以从这个行为推测enclave是未加密的（否则如果是加密的话就不需要sealing了。不知道这样理解对不对）</p>
-</li>
-<li><p><a href="https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/722444" target="_blank" rel="noopener">参考资料3</a></p>
-<p>提问者从文档当中对数据是否加密产生了矛盾的结论。Intel的工程师回答”Data in EPC is encrypted and integrity protected “, 但之后又说”From the <strong>CPU standpoint</strong>, data in EPC is unencrypted, because the MEE sits transparently between the CPU and the PRM. In other words, the data in EPC is encrypted because it’s outside the CPU package. However, it doesn’t need to be this way. For instance, a CPU with special on-chip memory wouldn’t need the MEE and the EPC memory wouldn’t have to be encrypted.”</p>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>对于这个问题我还需要再查一查。
-</code></pre><ol start="5">
-<li><p>对于EPC的R/W ops，OS是可以看见的？</p>
-<p>（未找见相应资料。我推测如果操作是enclave与外界（memory）的话，肯定能被OS看见。在enclave内部的话，就看不见了）</p>
-</li>
-</ol>
-
           
+EPC是什么？物理位置在哪里？
+
+EPC:Enclave Page Cache.
+The contents of enclaves and the associated data structures are stored in the Enclave Page Cache (EPC), which is a subset of DRAM. (which is not on CPU and it
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/13/SGX Q&A/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1555,7 +1183,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -1617,58 +1245,18 @@
       
         
           
-            <ol>
-<li><p>Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？</p>
-<blockquote>
-<p>Operations which can cause a shuffle include <strong>repartition operations</strong> like repartition and coalesce, <strong>‘ByKey’ operations</strong> (except for counting) like groupByKey and reduceByKey, and <strong>join operations</strong> like cogroup and join <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#background" target="_blank" rel="noopener">RDD doc</a></p>
-</blockquote>
-<ul>
-<li>repartition operations: <code>repartition</code>, <code>coalesce</code></li>
-<li>‘ByKey’ operations: <code>groupByKey</code>, <code>reduceByKey</code>, <code>aggregateByKey</code>, <code>sortByKey</code>  (<code>countByKey</code> is an <em>Actions</em> operation, so it isn’t a <em>shuffle operation</em>)</li>
-<li>join operations: <code>cogroup</code>, <code>join</code></li>
-<li><p>Another operation which takes “numPartitions” as an argument is <code>distinct</code> operation</p>
-<p>RDD is stored in memory by default. There are  seven storage level. The full set of storage levels can be found <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence" target="_blank" rel="noopener">here</a>. <em>MEMORY_ONLY</em> is the default level, which means when data can’t fit in memory, <strong>some partitions will not be cached</strong> and will be <strong>recomputed</strong> on the fly each time they’re needed. In <em>MEMORY_AND_DISK</em> level, if the RDD does not fit in memory, store the partitions that don’t fit on disk, and read them from there when they’re needed. Also, shuffle generates a large number of intermediate files on disk, these files are preserved until the corresponding RDDs are no longer used and are garbage collected. This is done so the shuffle files don’t need to be re-created if the lineage is re-computed.</p>
-<p>（有个问题：刚开始的资料来自RDD doc，在这个shuffle类目<a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#performance-impact" target="_blank" rel="noopener">链接</a>的第三段最后一句，原文是说内存不够的话就会把tables存到disk中。这里说的只是针对’ByKey操作吗？（因为上文在说ByKey操作））</p>
-</li>
-</ul>
-</li>
-<li><p>Spark中所谓的lazy transformation触发条件有哪些？</p>
-<blockquote>
-<p>The transformations are only computed when an action requires a result to be returned to the driver program. <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-operations" target="_blank" rel="noopener">RDD doc</a></p>
-</blockquote>
-<p> <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#actions" target="_blank" rel="noopener">Actions操作</a></p>
-</li>
-<li><p>Spark core API</p>
-<p> Spark Core提供Spark最基础与最核心的功能，主要包括以下功能：</p>
-<ul>
-<li>SparkContext：通常而言，Driver Application的执行与输出都是通过SparkContext来完成的。在正式提交Application之前，首先需要初始化SparkContext。SparkContext隐藏了网络通信、分布式部署、消息通信、存储能力、计算能力、缓存、测量系统、文件服务、Web服务等内容，应用程序开发者只需要使用SparkContext提供的API完成功能开发。SparkContext内置的DAGScheduler负责创建Job，将DAG中的RDD划分到不同的Stage，提交Stage等功能。内置的TaskScheduler负责资源的申请，任务的提交及请求集群对任务的调度等工作。 </li>
-<li>存储体系：Spark优先考虑使用各节点的内存作为存储，当内存不足时才会考虑使用磁盘，这极大地减少了磁盘IO，提升了任务执行的效率，使得Spark适用于实时计算、流式计算等场景。此外，Spark还提供了以内存为中心的高容错的分布式文件系统Tachyon供用户进行选择。Tachyon能够为Spark提供可靠的内存级的文件共享服务。 </li>
-<li>计算引擎：计算引擎由SparkContext中的DAGScheduler、RDD以及具体节点上的Executor负责执行的Map和Reduce任务组成。DAGScheduler和RDD虽然位于SparkContext内部，但是在任务正式提交与执行之前会将Job中的RDD组织成有向无环图（DAG），并对Stage进行划分，决定了任务执行阶段任务的数量、迭代计算、shuffle等过程。 </li>
-<li>部署模式：由于单节点不足以提供足够的存储和计算能力，所以作为大数据处理的Spark在SparkContext的TaskScheduler组件中提供了对Standalone部署模式的实现和Yarn、Mesos等分布式资源管理系统的支持。通过使用Standalone、Yarn、Mesos等部署模式为Task分配计算资源，提高任务的并发执行效率。</li>
-</ul>
-</li>
-<li><p>Where is RDD’s lineage stored? And how to get it?</p>
-<blockquote>
-<p>The RDD‘s lineage is stored in memory, same as RDD. And the RDD lineage lives on the driver where RDDs live. <a href="https://stackoverflow.com/questions/34713793/where-spark-rdd-lineage-is-stored" target="_blank" rel="noopener">stackoverflow</a></p>
-</blockquote>
-<p> To get lineage:</p>
-<ol>
-<li><p>Using <code>toDebugString</code> method, one can get RDD lineage graph.  (<a href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-rdd-lineage.html#toDebugString" target="_blank" rel="noopener">参考</a>)</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> wordCount = sc.textFile(<span class="string">"README.md"</span>).flatMap(_.split(<span class="string">"\\s+"</span>)).map((_, <span class="number">1</span>)).reduceByKey(_ + _)</span><br><span class="line">wordCount: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = <span class="type">ShuffledRDD</span>[<span class="number">21</span>] at reduceByKey at &lt;console&gt;:<span class="number">24</span></span><br><span class="line"></span><br><span class="line">scala&gt; wordCount.toDebugString</span><br><span class="line">res13: <span class="type">String</span> =</span><br><span class="line">(<span class="number">2</span>) <span class="type">ShuffledRDD</span>[<span class="number">21</span>] at reduceByKey at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line"> +-(<span class="number">2</span>) <span class="type">MapPartitionsRDD</span>[<span class="number">20</span>] at map at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line">    |  <span class="type">MapPartitionsRDD</span>[<span class="number">19</span>] at flatMap at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line">    |  <span class="type">README</span>.md <span class="type">MapPartitionsRDD</span>[<span class="number">18</span>] at textFile at &lt;console&gt;:<span class="number">24</span> []</span><br><span class="line">    |  <span class="type">README</span>.md <span class="type">HadoopRDD</span>[<span class="number">17</span>] at textFile at &lt;console&gt;:<span class="number">24</span> []</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>In spark shell, with <em>spark.logLineage</em> property enabled , <code>toDebugString</code> is included when executing an action.</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/spark-shell --conf spark.logLineage=true</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>Using <code>spark-submit</code> </p>
-<p>This section is still in progress…( Because using <code>--conf spark.logLineage=true</code>, the console doesn`t print the graph.)</p>
-<p>And this is the <code>runjob</code> method’s souce code in SparkContext class.</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">runJob</span></span>[<span class="type">T</span>, <span class="type">U</span>: <span class="type">ClassTag</span>](</span><br><span class="line">      rdd: <span class="type">RDD</span>[<span class="type">T</span>],</span><br><span class="line">      func: (<span class="type">TaskContext</span>, <span class="type">Iterator</span>[<span class="type">T</span>]) =&gt; <span class="type">U</span>,</span><br><span class="line">      partitions: <span class="type">Seq</span>[<span class="type">Int</span>],</span><br><span class="line">      resultHandler: (<span class="type">Int</span>, <span class="type">U</span>) =&gt; <span class="type">Unit</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="keyword">if</span> (stopped.get()) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">"SparkContext has been shutdown"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> callSite = getCallSite</span><br><span class="line">    <span class="keyword">val</span> cleanedFunc = clean(func)</span><br><span class="line">    logInfo(<span class="string">"Starting job: "</span> + callSite.shortForm)</span><br><span class="line">    <span class="keyword">if</span> (conf.getBoolean(<span class="string">"spark.logLineage"</span>, <span class="literal">false</span>)) &#123;</span><br><span class="line">      logInfo(<span class="string">"RDD's recursive dependencies:\n"</span> + rdd.toDebugString)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-</li>
-</ol>
-
           
+Spark的shuffle类操作有哪些（除去groupbyKey)？这些操作是把partition 直接load到内存中吗？
+
+Operations which can cause a shuffle include repartition operations like repartition and coalesce, ‘ByKey’ operations (except for count
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/05/Spark Q&A/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1724,7 +1312,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -1786,156 +1374,19 @@
       
         
           
-            <h1 id="SparkML电影推荐流程分析"><a href="#SparkML电影推荐流程分析" class="headerlink" title="SparkML电影推荐流程分析"></a>SparkML电影推荐流程分析</h1><p>之前采用<code>spark-submit</code> 进行分析，产出的信息太多，很难缕清关系，难以得到每步产生的数据和操作过程。所以采用<code>spark-shell</code> 以一行一行输入的方式交互进行程序运行，同时从Web-UI上产生的信息进行同步分析。以下为每步操作：</p>
-<p>为了打字方便，以下 Web-UI统一拿 web 代替。</p>
-<ol>
-<li><p>启动<code>spark-shell</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chzhou@lotus02:/usr/spark/bin$ spark-shell --conf spark.logLineage=true --master spark://lotus02:7077 --deploy-mode client --jars file:///home/chzhou/mltr/machine-learning/target/scala-2.11/movielens-als_2.11-0.1.jar</span><br></pre></td></tr></table></figure>
-<ul>
-<li>操作的时候把程序用sbt打包的jar包导入，这样在shell里就可以调用原程序自定义的函数</li>
-<li>指定master和deploy-mode，以分布式运行</li>
-<li>使得<code>spark.logLineage</code> 为true，这样就能在控制台自动输出 RDD 的lineage</li>
-</ul>
-</li>
-<li><p>导入库</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.<span class="type">File</span></span><br><span class="line"><span class="keyword">import</span> scala.io.<span class="type">Source</span></span><br><span class="line"><span class="keyword">import</span> org.apache.log4j.<span class="type">Logger</span></span><br><span class="line"><span class="keyword">import</span> org.apache.log4j.<span class="type">Level</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkConf</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span></span><br><span class="line"><span class="keyword">import</span> org.apache.spark.<span class="type">SparkContext</span>._</span><br><span class="line"><span class="keyword">import</span> org.apache.spark.rdd._</span><br><span class="line"><span class="keyword">import</span> org.apache.spark.mllib.recommendation.&#123;<span class="type">ALS</span>, <span class="type">Rating</span>, <span class="type">MatrixFactorizationModel</span>&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>读取个人喜好的rating文件，并形成rdd</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> myRatings = <span class="type">MovieLensALS</span>.loadRatings(<span class="string">"/home/chzhou/ml-1m/personalRatings.txt"</span>)</span><br><span class="line">myRatings: <span class="type">Seq</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">Stream</span>(<span class="type">Rating</span>(<span class="number">0</span>,<span class="number">1</span>,<span class="number">2.0</span>), ?)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> myRatingsRDD = sc.parallelize(myRatings, <span class="number">1</span>).cache</span><br><span class="line">myRatingsRDD: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">ParallelCollectionRDD</span>[<span class="number">0</span>] at parallelize at &lt;console&gt;:<span class="number">39</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>第二句用<code>cache</code>将其存入内存，这样Web-UI中的Storage选项之后就可以查到RDD信息</li>
-<li>此时Web-UI中还是全空的，没有任何信息，因为此时并没有Actions操作，并没有实际产生RDD</li>
-</ul>
-</li>
-<li><p>在spark-shell中以多行输入的方式读取rating.dat文件</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"> <span class="keyword">val</span> ratings = sc.textFile(<span class="string">"hdfs://lotus02:9000/ml/medium/ratings.dat"</span>).map &#123; line =&gt;</span><br><span class="line">      <span class="keyword">val</span> fields = line.split(<span class="string">"::"</span>)</span><br><span class="line">      <span class="comment">// format: (timestamp % 10, Rating(userId, movieId, rating))</span></span><br><span class="line">      (fields(<span class="number">3</span>).toLong % <span class="number">10</span>, <span class="type">Rating</span>(fields(<span class="number">0</span>).toInt, fields(<span class="number">1</span>).toInt, fields(<span class="number">2</span>).toDouble))</span><br><span class="line">    &#125;.cache</span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">ratings: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">Long</span>, org.apache.spark.mllib.recommendation.<span class="type">Rating</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">3</span>] at map at &lt;console&gt;:<span class="number">37</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>在spark-shell中以多行输入的方式读取movies.dat文件</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"><span class="keyword">val</span> movies = sc.textFile(<span class="string">"hdfs://lotus02:9000/ml/medium/movies.dat"</span>).map &#123; line =&gt;</span><br><span class="line">      <span class="keyword">val</span> fields = line.split(<span class="string">"::"</span>)</span><br><span class="line">      <span class="comment">// format: (movieId, movieName)</span></span><br><span class="line">      (fields(<span class="number">0</span>).toInt, fields(<span class="number">1</span>))</span><br><span class="line">    &#125;.cache</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">movies: org.apache.spark.rdd.<span class="type">RDD</span>[(<span class="type">Int</span>, <span class="type">String</span>)] = <span class="type">MapPartitionsRDD</span>[<span class="number">6</span>] at map at &lt;console&gt;:<span class="number">37</span></span><br><span class="line"></span><br><span class="line">scala&gt; movies.collect().toMap</span><br><span class="line">res0: scala.collection.immutable.<span class="type">Map</span>[<span class="type">Int</span>,<span class="type">String</span>] = <span class="type">Map</span>(<span class="number">2163</span> -&gt; <span class="type">Attack</span> of the <span class="type">Killer</span> <span class="type">Tomatoes</span>! (<span class="number">1980</span>), <span class="number">645</span> -&gt; <span class="type">Nelly</span> &amp; <span class="type">Monsieur</span> <span class="type">Arnaud</span> (<span class="number">1995</span>), <span class="number">892</span> -&gt; <span class="type">Twelfth</span> <span class="type">Night</span> (<span class="number">1996</span>), <span class="number">69</span> -&gt; <span class="type">Friday</span> (<span class="number">1995</span>), <span class="number">2199</span> -&gt; <span class="type">Phoenix</span> (<span class="number">1998</span>), <span class="number">3021</span> -&gt; <span class="type">Funhouse</span>, <span class="type">The</span> (<span class="number">1981</span>), <span class="number">1322</span> -&gt; <span class="type">Amityville</span> <span class="number">1992</span>: <span class="type">It</span><span class="symbol">'s</span> <span class="type">About</span> <span class="type">Time</span> (<span class="number">1992</span>), <span class="number">1665</span> -&gt; <span class="type">Bean</span> (<span class="number">1997</span>), <span class="number">1036</span> -&gt; <span class="type">Die</span> <span class="type">Hard</span> (<span class="number">1988</span>), <span class="number">2822</span> -&gt; <span class="type">Medicine</span> <span class="type">Man</span> (<span class="number">1992</span>), <span class="number">2630</span> -&gt; <span class="type">Besieged</span> (<span class="type">L</span>' <span class="type">Assedio</span>) (<span class="number">1998</span>), <span class="number">3873</span> -&gt; <span class="type">Cat</span> <span class="type">Ballou</span> (<span class="number">1965</span>), <span class="number">1586</span> -&gt; <span class="type">G</span>.<span class="type">I</span>. <span class="type">Jane</span> (<span class="number">1997</span>), <span class="number">1501</span> -&gt; <span class="type">Keys</span> to <span class="type">Tulsa</span> (<span class="number">1997</span>), <span class="number">2452</span> -&gt; <span class="type">Gate</span> <span class="type">II</span>: <span class="type">Trespassers</span>, <span class="type">The</span> (<span class="number">1990</span>), <span class="number">809</span> -&gt; <span class="type">Fled</span> (<span class="number">1996</span>), <span class="number">1879</span> -&gt; <span class="type">Hanging</span> <span class="type">Garden</span>, <span class="type">The</span> (<span class="number">1997</span>), <span class="number">1337</span> -&gt; <span class="type">Body</span> <span class="type">Snatcher</span>, <span class="type">The</span> (<span class="number">1945</span>), <span class="number">1718</span> -&gt; <span class="type">Stranger</span> in the <span class="type">House</span> (<span class="number">1997</span>), <span class="number">2094</span> -&gt; <span class="type">Rocketeer</span>, <span class="type">The</span> (<span class="number">1991</span>), <span class="number">3944</span> -&gt; <span class="type">Bootmen</span> (<span class="number">2000</span>), <span class="number">1411</span> -&gt; <span class="type">Hamlet</span> (<span class="number">1996</span>), <span class="number">629</span> -&gt; <span class="type">Rude</span> (<span class="number">1995</span>), <span class="number">3883</span> -&gt; <span class="type">Catfish</span> in <span class="type">Black</span> <span class="type">Bean</span> <span class="type">Sauce</span> (<span class="number">2.</span>.</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>这里改写了原程序，原程序是直接进行了collect.toMap操作，这里分成两步，先cache存到内存中，再进行colletc.toMap操作</p>
-</li>
-<li><p>因为进行了collect操作，此时web显示了信息</p>
-<p><img src="/images/SparkML电影推荐流程分析/s0.PNG" alt="s0"><br>为Stage0信息，进行了map操作。（绿色代表在内存中）</p>
-</li>
-<li><p>在web中stage/Aggregated Metrics by Executor选项中，可以看到</p>
-<p><img src="/images/SparkML电影推荐流程分析/s0 reco.PNG" alt="s0 reco"></p>
-<p>图片有些小。。。简单来说，就是movies.dat中总共有3883条record，这里08机器存了1951条record，09上存了3883-1951=1932条数据。在这里看出了数据的分布。从这个方面也显示了上图中map操作的时候从movies.dat[4]和movies.dat[5]中获得数据。（但是看不出来movies.dat[4]是08还是09上）</p>
-</li>
-<li><p>附上storage界面信息</p>
-<p><img src="/images/SparkML电影推荐流程分析/s0 stor.PNG" alt="s0 stor"></p>
-</li>
-</ul>
-</li>
-<li><p>对ratings进行统计计数，先是对numRatings计数</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numRatings = ratings.count</span><br><span class="line">numRatings: <span class="type">Long</span> = <span class="number">1000209</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>输出ratings的数据总共有1000209条数据</p>
-</li>
-<li><p>从web上查看stage信息</p>
-<p><img src="/images/SparkML电影推荐流程分析/s1.PNG" alt="s1"></p>
-<p>显示cache的是MapPartitionsRDD[3]，这与在第4步中的控制台输出是一样的。</p>
-</li>
-<li><p>查看slave存储</p>
-<p><img src="/images/SparkML电影推荐流程分析/s1 rec.PNG" alt="s1 rec"></p>
-<p>08上有503331条record，09上有1000209-503331=496878条数据</p>
-</li>
-<li><p>storage界面信息和上一步差不多，不截图显示了。</p>
-</li>
-</ul>
-</li>
-<li><p>接下来统计用户数</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numUsers = ratings.map(_._2.user).distinct.count</span><br><span class="line">numUsers: <span class="type">Long</span> = <span class="number">6040</span></span><br></pre></td></tr></table></figure>
-<p>这里的map语句不太懂（推测是对ratings的字段进行操作）。。。然后进行了distinct操作，找出unique的用户，然后count进行计数。这里得到有6040名用户</p>
-<p>这里为Job2，Job2里有两个stage，第一个是distinct操作，第二个是count操作。</p>
-<ul>
-<li><p>第一个是distinct操作</p>
-<p><img src="/images/SparkML电影推荐流程分析/j2s1.PNG" alt="j2s1"></p>
-<p>这里用了之前cache过的RDD[3]，然后进行map和distinct操作。</p>
-<p>对于存储，不截图了，都一样，其中08上有3092条record，09上有2949条record（3092+2949=6041条，和上面输出的6040不一样。。？？）</p>
-</li>
-<li><p>第二个是count操作</p>
-<p><img src="/images/SparkML电影推荐流程分析/j2说.PNG" alt="j2说"></p>
-<p>（不懂为什么右上角是distinct，难道是在distinct里进行count操作，所以这么显示？？）</p>
-<p> (在存储方面，08上是3020条record，09上是3021条record（加起来还是6041，为什么不是6040？？）</p>
-</li>
-</ul>
-</li>
-<li><p>接下来进行numMovies统计</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numMovies = ratings.map(_._2.product).distinct.count</span><br><span class="line">numMovies: <span class="type">Long</span> = <span class="number">3706</span></span><br></pre></td></tr></table></figure>
-<p>统计出来numMovies是3706部。</p>
-<p>此时为Job3，和上一步一样，分为两个阶段，也是distinct和count操作。DAG图和上一步差不多。不截图了。在存储方面，distinct操作中08是3619条record，09上是3600条record。在count操作中08是3620条record，09是3599条数据。两个操作中的总数都是7219条record。</p>
-</li>
-<li><p>定义numPartions</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numPartitions = <span class="number">4</span></span><br><span class="line">numPartitions: <span class="type">Int</span> = <span class="number">4</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>之后几步都是从ratings对数据进行切分，产生ML中的数据集。第一个数据集是训练集</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"><span class="keyword">val</span> training = ratings.filter(x =&gt; x._1 &lt; <span class="number">6</span>)</span><br><span class="line">      .values</span><br><span class="line">      .union(myRatingsRDD)</span><br><span class="line">      .repartition(numPartitions)</span><br><span class="line">      .cache()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">training: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">21</span>] at repartition at &lt;console&gt;:<span class="number">45</span></span><br></pre></td></tr></table></figure>
-<p>此时web中并没有变化，因为没有Actions操作。但是用cache将其存在了内存中。并且注意到和myRatingsRDD进行了union操作，并进行了repartition。</p>
-</li>
-<li><p>产生验证集</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; :paste</span><br><span class="line"><span class="comment">// Entering paste mode (ctrl-D to finish)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> validation = ratings.filter(x =&gt; x._1 &gt;= <span class="number">6</span> &amp;&amp; x._1 &lt; <span class="number">8</span>)</span><br><span class="line">      .values</span><br><span class="line">      .repartition(numPartitions)</span><br><span class="line">      .cache()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Exiting paste mode, now interpreting.</span></span><br><span class="line"></span><br><span class="line">validation: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">28</span>] at repartition at &lt;console&gt;:<span class="number">42</span></span><br></pre></td></tr></table></figure>
-<p>web中还没有变化。进行了repartition。</p>
-</li>
-<li><p>产生测试集</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> test = ratings.filter(x =&gt; x._1 &gt;= <span class="number">8</span>).values.cache()</span><br><span class="line">test: org.apache.spark.rdd.<span class="type">RDD</span>[org.apache.spark.mllib.recommendation.<span class="type">Rating</span>] = <span class="type">MapPartitionsRDD</span>[<span class="number">30</span>] at values at &lt;console&gt;:<span class="number">38</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>统计训练集大小</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numTraining = training.count()</span><br><span class="line">numTraining: <span class="type">Long</span> = <span class="number">602252</span></span><br></pre></td></tr></table></figure>
-<p>因为进行了count操作，此时web有repartition了信息。</p>
-<p>为Job4，分为两个阶段，第一个为repartition，第二个是count操作。</p>
-<ul>
-<li><p>第一个为repartition，DAG图为</p>
-<p><img src="/images/SparkML电影推荐流程分析/j4s1.PNG" alt="j4s1"></p>
-<p>这里因为是对ratings操作，ratingsRDD已经cache过，所以直接读取，进行filter操作，然后与myRatings进行union，然后进行repartition。</p>
-<p>存储方面，08上有303152条record，09上有299100条record，一共303152+299100=602252条record。</p>
-</li>
-<li><p>第二个是count操作，DAG图为</p>
-<p><img src="/images/SparkML电影推荐流程分析/j4s2.PNG" alt="j4s2"></p>
-<p>存储方面，08上有301126条record，09上有301126条record，一共301126+301126=602252条。</p>
-</li>
-<li><p>在web上的storage界面，显示Partitions已经为4：</p>
-<p><img src="/images/SparkML电影推荐流程分析/j4stor.PNG" alt="j4stor"></p>
-<p>前几个的RDD除了第一个rdd是一个partition，其他都是两个partition。RDD doc中关于partition是这样说的：“Normally, Spark tries to set the number of partitions automatically based on your cluster”。前几个都是spark自动生成的partition。</p>
-</li>
-</ul>
-</li>
-<li><p>统计验证集大小</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numValidation = validation.count()</span><br><span class="line">numValidation: <span class="type">Long</span> = <span class="number">198919</span></span><br></pre></td></tr></table></figure>
-<p>此时为Job5，与上一步一样，同样分为repartition和count操作。</p>
-<ul>
-<li><p>repartition操作DAG图为</p>
-<p><img src="/images/SparkML电影推荐流程分析/j5s1.PNG" alt="j5s1"></p>
-<p>因为没有上一步的union操作，所以这里直接从以前cache过的RDD[3]进行filter，repartition操作。存储方面，08上有100299条数据，09上有98620条数据，一共100299+98620=198919条数据。</p>
-</li>
-<li><p>count操作</p>
-<p><img src="/images/SparkML电影推荐流程分析/j5s2.PNG" alt="j5s2"></p>
-<p>数据方面，08上有99459条数据，09上有99460条数据，一共99459+99460=198919条数据。</p>
-</li>
-<li><p>在web上的storage界面，partitions同样为4。（未截图）</p>
-</li>
-</ul>
-</li>
-<li><p>统计测试集数据大小。</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numTest = test.count()</span><br><span class="line">numTest: <span class="type">Long</span> = <span class="number">199049</span></span><br></pre></td></tr></table></figure>
-<p>此时为Job6阶段，因为对test没有进行repartition操作，这里只有count操作。</p>
-<ul>
-<li><p>DAG图为</p>
-<p><img src="/images/SparkML电影推荐流程分析/j6s.PNG" alt="j6s"></p>
-<p>在存储方面，08上有503331条record，09上有496878条record，一共503331+496878=1000209数据。（为什么与输出不一致？）</p>
-<p>另外，在web的storage界面，因为没有repartition操作，产生的rdd[30]为两个partition。</p>
-</li>
-</ul>
-</li>
-<li><p>接下来是准备训练的一些参数</p>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> ranks = <span class="type">List</span>(<span class="number">8</span>, <span class="number">12</span>)</span><br><span class="line">ranks: <span class="type">List</span>[<span class="type">Int</span>] = <span class="type">List</span>(<span class="number">8</span>, <span class="number">12</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> lambdas = <span class="type">List</span>(<span class="number">0.1</span>, <span class="number">10.0</span>)</span><br><span class="line">lambdas: <span class="type">List</span>[<span class="type">Double</span>] = <span class="type">List</span>(<span class="number">0.1</span>, <span class="number">10.0</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> numIters = <span class="type">List</span>(<span class="number">10</span>, <span class="number">20</span>)</span><br><span class="line">numIters: <span class="type">List</span>[<span class="type">Int</span>] = <span class="type">List</span>(<span class="number">10</span>, <span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestModel: <span class="type">Option</span>[<span class="type">MatrixFactorizationModel</span>] = <span class="type">None</span></span><br><span class="line">bestModel: <span class="type">Option</span>[org.apache.spark.mllib.recommendation.<span class="type">MatrixFactorizationModel</span>] = <span class="type">None</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestValidationRmse = <span class="type">Double</span>.<span class="type">MaxValue</span></span><br><span class="line">bestValidationRmse: <span class="type">Double</span> = <span class="number">1.7976931348623157E308</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestRank = <span class="number">0</span></span><br><span class="line">bestRank: <span class="type">Int</span> = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestLambda = <span class="number">-1.0</span></span><br><span class="line">bestLambda: <span class="type">Double</span> = <span class="number">-1.0</span></span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">var</span> bestNumIter = <span class="number">-1</span></span><br><span class="line">bestNumIter: <span class="type">Int</span> = <span class="number">-1</span></span><br></pre></td></tr></table></figure>
-<p>此时没有rdd产生，web上没有变化。</p>
-</li>
-<li><p>此时进行了模型训练，调用ML库中的ALS（交替最小二乘 alternating least squares）。此时产生了很多的操作，且数据不清晰，有大量的矩阵操作） </p>
-</li>
-</ol>
+          SparkML电影推荐流程分析之前采用spark-submit 进行分析，产出的信息太多，很难缕清关系，难以得到每步产生的数据和操作过程。所以采用spark-shell 以一行一行输入的方式交互进行程序运行，同时从Web-UI上产生的信息进行同步分析。以下为每步操作：
+为了打字方便，以下 Web-UI统一拿 web 代替。
 
-          
+启动spark-shell
+1chzhou@lotus02:/usr/s
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/08/02/SparkML电影推荐流程分析/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1991,7 +1442,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="周的小站">
+      <meta itemprop="name" content="Zhou's Blog">
     </span>
 
     
@@ -2053,51 +1504,22 @@
       
         
           
-            <ul>
-<li>Hackthiscontract.io  (<a href="http://hackthiscontract.io/dashboard?address=0x957B256d320f03A9Be873380772F3Deb2AD78dE3" target="_blank" rel="noopener">地址</a>)<ul>
-<li>需要输入Rinkeby address进行登陆</li>
-<li>只提供了四个合约进行攻击游戏，分别是 ‘Naive Programmer’(over- and under-flow), ‘ERC20’, ‘Coin Flip’, ‘Lost Ether’</li>
-</ul>
-</li>
-<li>trail of bits/not-so-smart-contracts (<a href="https://github.com/trailofbits/not-so-smart-contracts" target="_blank" rel="noopener">地址</a>)<ul>
-<li>contains examples of common Ethereum smart contract vulnerabilities, including code from real smart contracts</li>
-<li>合约类型<ul>
-<li>Honeypots：6个</li>
-<li>Integer overflow：1个</li>
-<li>Missing constructor：2个</li>
-<li>Race condition（TOD）：1个</li>
-<li>Reentrancy：1个</li>
-<li>Unchecked external call：1个</li>
-<li>Unprotected function：2个</li>
-<li>Variable shadowing：1个</li>
-<li>Wrong interface：1个</li>
-</ul>
-</li>
-<li>Oyente能检测出来的（未实际检测，仅理论)<ul>
-<li>Integer overflow</li>
-<li>Race condition（TOD）</li>
-<li>Reentrancy</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>GOATCasino (<a href="https://github.com/nccgroup/GOATCasino" target="_blank" rel="noopener">地址</a>)<ul>
-<li>只有一个，主文件是Lottery.sol，类似于在《Survey of Smart Contract Attacks》论文中的4.3节Multi-player games</li>
-</ul>
-</li>
-<li>ethernaut (<a href="https://github.com/OpenZeppelin/ethernaut" target="_blank" rel="noopener">地址1</a>) (<a href="https://ethernaut.zeppelin.solutions/" target="_blank" rel="noopener">地址2</a>)<ul>
-<li>同样也是游戏网站，提供的例子比Hackthiscontract.io要多一些</li>
-<li>有fallback，Reentrancy等漏洞合约</li>
-</ul>
-</li>
-<li><p>capturetheether(<a href="https://capturetheether.com/challenges/" target="_blank" rel="noopener">地址</a>)</p>
-<ul>
-<li>tokensale: Integer Overflow</li>
-</ul>
-</li>
-</ul>
-
           
+Hackthiscontract.io  (地址)
+需要输入Rinkeby address进行登陆
+只提供了四个合约进行攻击游戏，分别是 ‘Naive Programmer’(over- and under-flow), ‘ERC20’, ‘Coin Flip’, ‘Lost Ether’
+
+
+trail of bits/not-so-smart-contracts (地址)
+contains 
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/09/Vulnerable Contracts Resource/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2171,7 +1593,7 @@
           <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Zhou">
           <p class="site-author-name" itemprop="name">Zhou</p>
            
-              <p class="site-description motion-element" itemprop="description">周的小站</p>
+              <p class="site-description motion-element" itemprop="description">Zhou's Blog</p>
           
         </div>
         <nav class="site-state motion-element">
@@ -2260,7 +1682,7 @@
   <div class="theme-info">
     主题 &mdash;
     <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-      NexT.Mist
+      NexT.Muse
     </a>
   </div>
 
